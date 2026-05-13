@@ -362,6 +362,7 @@ h1 .accent-text {
   flex-wrap: wrap;
   opacity: 0;
   animation: fadeUp 0.8s var(--transition) 0.8s forwards;
+  align-items: center;
 }
 
 .btn-primary {
@@ -405,6 +406,30 @@ h1 .accent-text {
 .btn-secondary:hover {
   border-color: var(--text-primary);
   color: var(--text-primary);
+}
+
+/* Added Hero Social Links */
+.hero-socials {
+  display: flex;
+  gap: 12px;
+  margin-left: 10px;
+}
+.hero-social-btn {
+  width: 44px; height: 44px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
+  font-size: 16px;
+}
+.hero-social-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: translateY(-2px);
+  background: var(--accent-dim);
 }
 
 .hero-stats {
@@ -483,12 +508,39 @@ section {
   border-bottom: 1px solid var(--border);
 }
 
+/* Upgraded About Layout with Profile Picture */
+.about-top-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: clamp(40px, 6vw, 80px);
+  align-items: center;
+  margin-top: 60px;
+  margin-bottom: 40px;
+}
+
+.profile-pic-container {
+  position: relative;
+}
+
+.profile-pic {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--accent);
+  box-shadow: 0 0 30px var(--accent-dim);
+  transition: transform var(--transition);
+}
+
+.profile-pic:hover {
+  transform: scale(1.03);
+}
+
 .about-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: clamp(40px, 6vw, 100px);
   align-items: start;
-  margin-top: 60px;
 }
 
 .about-text p {
@@ -614,9 +666,28 @@ section {
   box-shadow: 0 20px 60px rgba(0,229,255,0.08);
 }
 
+/* Added Project Images */
+.project-image {
+  width: 100%;
+  height: 180px;
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+  background: var(--bg-primary);
+}
+
+.project-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.project-card:hover .project-image img {
+  transform: scale(1.05);
+}
+
 .project-card-top {
   padding: 28px 28px 20px;
-  border-bottom: 1px solid var(--border);
   position: relative;
 }
 
@@ -658,6 +729,7 @@ section {
 
 .project-card-bottom {
   padding: 20px 28px;
+  border-top: 1px solid var(--border);
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
@@ -701,7 +773,7 @@ section {
 }
 
 /* ============================================
-   PROJECT MODAL
+   PROJECT MODAL & VIDEOS
 ============================================ */
 .modal-overlay {
   position: fixed;
@@ -837,6 +909,26 @@ section {
   gap: 8px;
 }
 
+/* Reusable Video Box for Modals & Demo */
+.video-embed-box {
+  position: relative;
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+  aspect-ratio: 16/9;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.video-embed-box iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
 /* ============================================
    DEMO VIDEO SECTION
 ============================================ */
@@ -856,89 +948,6 @@ section {
   font-weight: 300;
   max-width: 600px;
   margin-bottom: 40px;
-}
-
-.video-embed-box {
-  position: relative;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  overflow: hidden;
-  aspect-ratio: 16/9;
-  width: 100%;
-}
-
-.video-placeholder {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 20px;
-  background: var(--bg-card);
-}
-
-.video-placeholder-icon {
-  width: 72px; height: 72px;
-  border: 2px solid var(--border-accent);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 28px;
-  color: var(--accent);
-  position: relative;
-}
-
-.video-placeholder-icon::before {
-  content: '';
-  position: absolute;
-  inset: -8px;
-  border: 1px solid var(--border-accent);
-  border-radius: 50%;
-  animation: ripple 2s ease-out infinite;
-}
-
-.video-placeholder-label {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
-  color: var(--text-muted);
-  letter-spacing: 0.1em;
-  text-align: center;
-}
-
-.video-placeholder-sublabel {
-  font-size: 13px;
-  color: var(--text-muted);
-  text-align: center;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  letter-spacing: 0.05em;
-  max-width: 280px;
-  line-height: 1.6;
-  margin-top: -8px;
-}
-
-.video-embed-box iframe {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  border: none;
-}
-
-.video-edit-note {
-  margin-top: 16px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  color: var(--text-muted);
-  letter-spacing: 0.05em;
-  padding: 10px 16px;
-  background: var(--accent-dim);
-  border: 1px solid var(--border-accent);
-  border-radius: 2px;
-  display: inline-block;
 }
 
 /* ============================================
@@ -1209,7 +1218,7 @@ footer {
 }
 
 /* ============================================
-   MOBILE NAV
+   MOBILE NAV & RESPONSIVE
 ============================================ */
 .mobile-menu {
   position: fixed;
@@ -1237,13 +1246,12 @@ footer {
 
 .mobile-menu a:hover { color: var(--accent); }
 
-/* ============================================
-   RESPONSIVE
-============================================ */
 @media (max-width: 900px) {
   .nav-links { display: none; }
   .nav-cta { display: none; }
   .hamburger { display: flex; }
+  .about-top-layout { grid-template-columns: 1fr; text-align: center; }
+  .profile-pic-container { max-width: 280px; margin: 0 auto; }
   .about-grid { grid-template-columns: 1fr; }
   .contact-grid { grid-template-columns: 1fr; }
 }
@@ -1263,11 +1271,9 @@ footer {
 </head>
 <body>
 
-<!-- Custom Cursor -->
 <div class="cursor-dot" id="cursorDot"></div>
 <div class="cursor-ring" id="cursorRing"></div>
 
-<!-- Navigation -->
 <nav id="mainNav">
   <div class="nav-logo">
     <span></span>
@@ -1289,7 +1295,6 @@ footer {
   </div>
 </nav>
 
-<!-- Mobile Menu -->
 <div class="mobile-menu" id="mobileMenu">
   <a href="#about" onclick="closeMobile()">About</a>
   <a href="#skills" onclick="closeMobile()">Skills</a>
@@ -1298,7 +1303,6 @@ footer {
   <a href="#contact" onclick="closeMobile()">Contact</a>
 </div>
 
-<!-- ============ HERO ============ -->
 <section id="hero">
   <div class="hero-grid"></div>
   <div class="hero-orb hero-orb-1"></div>
@@ -1319,6 +1323,11 @@ footer {
   <div class="hero-actions">
     <a href="#projects" class="btn-primary">View My Work →</a>
     <a href="#contact" class="btn-secondary">Get In Touch</a>
+    
+    <div class="hero-socials">
+      <a href="https://web.facebook.com/jerielle2" target="_blank" class="hero-social-btn" title="Facebook">f</a>
+      <a href="https://www.onlinejobs.ph/jobseekers/info/2685788" target="_blank" class="hero-social-btn" title="OnlineJobs.ph">💼</a>
+    </div>
   </div>
 
   <div class="hero-stats">
@@ -1341,12 +1350,14 @@ footer {
   </div>
 </section>
 
-<!-- ============ ABOUT ============ -->
 <section id="about">
   <div class="section-label">About Me</div>
   <div class="section-title reveal">The Architect Behind the Systems</div>
 
-  <div class="about-grid">
+  <div class="about-top-layout">
+    <div class="profile-pic-container reveal">
+      <img src="https://images.unsplash.com/photo-1573164713988-8665fc963095?auto=format&fit=crop&q=80&w=400&h=400" alt="Jerielle Tadena" class="profile-pic">
+    </div>
     <div class="about-text reveal">
       <p>
         I'm <strong>Jerielle Tadena</strong>, a Senior High School ICT student from the Philippines resided here on Metro Manila, driven by the challenge of creating secure and efficient technology solutions. My journey began with a focus on core IT skills like PC troubleshooting and networking, but I have since channeled my energy into specializing in Cybersecurity and modern Virtual Assistance.
@@ -1358,6 +1369,9 @@ footer {
         Every system I build is <strong>production-grade</strong>: error-handled, documented, and built to run without breaking. I don't just connect apps. I architect reliable pipelines.
       </p>
     </div>
+  </div>
+
+  <div class="about-grid">
     <div class="about-highlights reveal">
       <div class="highlight-item">
         <h4>Fixer Mentality</h4>
@@ -1367,6 +1381,8 @@ footer {
         <h4>Systems Thinker</h4>
         <p>Every Make.com Router is an if/else. Every Iterator is a for-loop.</p>
       </div>
+    </div>
+    <div class="about-highlights reveal">
       <div class="highlight-item">
         <h4>Fast Learner</h4>
         <p>New API? Docs open. Built in an afternoon.</p>
@@ -1379,7 +1395,6 @@ footer {
   </div>
 </section>
 
-<!-- ============ SKILLS ============ -->
 <section id="skills">
   <div class="section-label">Tech Stack</div>
   <div class="section-title reveal">Tools I Build With</div>
@@ -1389,26 +1404,33 @@ footer {
     <div class="skill-chip"><span class="skill-dot cyan"></span>Webhooks</div>
     <div class="skill-chip"><span class="skill-dot cyan"></span>HTTP / REST APIs</div>
     <div class="skill-chip"><span class="skill-dot cyan"></span>JSON Parsing</div>
+    <div class="skill-chip"><span class="skill-dot purple"></span>n8n</div>
+    <div class="skill-chip"><span class="skill-dot purple"></span>Zapier</div>
+    
+    <div class="skill-chip"><span class="skill-dot cyan"></span>HubSpot CRM</div>
+    <div class="skill-chip"><span class="skill-dot cyan"></span>WordPress</div>
+    <div class="skill-chip"><span class="skill-dot cyan"></span>Notion</div>
+    <div class="skill-chip"><span class="skill-dot cyan"></span>Microsoft Tools</div>
     <div class="skill-chip"><span class="skill-dot cyan"></span>Google Sheets</div>
     <div class="skill-chip"><span class="skill-dot cyan"></span>Google Forms</div>
     <div class="skill-chip"><span class="skill-dot cyan"></span>Gmail Automation</div>
-    <div class="skill-chip"><span class="skill-dot cyan"></span>Telegram Bot API</div>
-    <div class="skill-chip"><span class="skill-dot orange"></span>OpenRouter AI</div>
+    
+    <div class="skill-chip"><span class="skill-dot orange"></span>Claude API</div>
+    <div class="skill-chip"><span class="skill-dot orange"></span>OpenAI / ChatGPT</div>
     <div class="skill-chip"><span class="skill-dot orange"></span>Gemini API</div>
+    <div class="skill-chip"><span class="skill-dot orange"></span>OpenRouter AI</div>
+    <div class="skill-chip"><span class="skill-dot orange"></span>Groq</div>
     <div class="skill-chip"><span class="skill-dot orange"></span>Prompt Engineering</div>
-    <div class="skill-chip"><span class="skill-dot orange"></span>AI Workflow Design</div>
+    
     <div class="skill-chip"><span class="skill-dot purple"></span>Google Apps Script</div>
     <div class="skill-chip"><span class="skill-dot purple"></span>JavaScript</div>
     <div class="skill-chip"><span class="skill-dot purple"></span>Python (Basic)</div>
     <div class="skill-chip"><span class="skill-dot purple"></span>Java Logic</div>
-    <div class="skill-chip"><span class="skill-dot cyan"></span>Error Handling</div>
     <div class="skill-chip"><span class="skill-dot cyan"></span>Data Stores</div>
-    <div class="skill-chip"><span class="skill-dot cyan"></span>Router / Filter Logic</div>
     <div class="skill-chip"><span class="skill-dot orange"></span>Postman</div>
   </div>
 </section>
 
-<!-- ============ PROJECTS ============ -->
 <section id="projects">
   <div class="section-label">Portfolio</div>
   <div class="section-title reveal">Systems I've Built</div>
@@ -1416,6 +1438,9 @@ footer {
   <div class="projects-grid">
 
     <div class="project-card reveal" onclick="openModal('modal1')">
+      <div class="project-image">
+        <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=600&q=80" alt="Lead Qualifier">
+      </div>
       <div class="project-card-top">
         <div class="project-number">01 — Lead Qualifier</div>
         <div class="project-title">AI-Powered Lead Qualification System</div>
@@ -1425,13 +1450,14 @@ footer {
       <div class="project-card-bottom">
         <span class="project-tag">Make.com</span>
         <span class="project-tag">OpenRouter AI</span>
-        <span class="project-tag">Webhook</span>
-        <span class="project-tag">Google Sheets</span>
         <span class="project-tag orange">AI Scoring</span>
       </div>
     </div>
 
     <div class="project-card reveal" onclick="openModal('modal2')">
+      <div class="project-image">
+        <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=600&q=80" alt="Business Monitor">
+      </div>
       <div class="project-card-top">
         <div class="project-number">02 — Business Monitor</div>
         <div class="project-title">Daily Business Health Monitor</div>
@@ -1440,13 +1466,15 @@ footer {
       </div>
       <div class="project-card-bottom">
         <span class="project-tag">Multi-API</span>
-        <span class="project-tag">Data Store</span>
         <span class="project-tag">Scheduler</span>
         <span class="project-tag orange">Persistent State</span>
       </div>
     </div>
 
     <div class="project-card reveal" onclick="openModal('modal3')">
+      <div class="project-image">
+        <img src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=600&q=80" alt="Follow-up Tracker">
+      </div>
       <div class="project-card-top">
         <div class="project-number">03 — Follow-up Tracker</div>
         <div class="project-title">Automated Follow-up Reminder Bot</div>
@@ -1455,85 +1483,33 @@ footer {
       </div>
       <div class="project-card-bottom">
         <span class="project-tag">Google Sheets</span>
-        <span class="project-tag">Text Aggregator</span>
         <span class="project-tag">Filter Logic</span>
         <span class="project-tag orange">Telegram</span>
-      </div>
-    </div>
-
-    <div class="project-card reveal" onclick="openModal('modal4')">
-      <div class="project-card-top">
-        <div class="project-number">04 — Weather Logger</div>
-        <div class="project-title">Live Weather Data Pipeline</div>
-        <p class="project-desc">HTTP module calls OpenWeather API with proper query-param authentication, parses JSON response, conditionally alerts if temperature exceeds threshold, logs all data with timestamps.</p>
-        <div class="project-arrow">↗</div>
-      </div>
-      <div class="project-card-bottom">
-        <span class="project-tag">OpenWeather API</span>
-        <span class="project-tag">HTTP Auth</span>
-        <span class="project-tag">Conditional Logic</span>
-        <span class="project-tag orange">Error Handler</span>
-      </div>
-    </div>
-
-    <div class="project-card reveal" onclick="openModal('modal5')">
-      <div class="project-card-top">
-        <div class="project-number">05 — Form Integration</div>
-        <div class="project-title">Google Forms → Webhook Bridge</div>
-        <p class="project-desc">Custom Google Apps Script that fires a Make.com webhook on every form submission — enabling real-time, event-driven automation from standard Google Forms with no third-party paid tools.</p>
-        <div class="project-arrow">↗</div>
-      </div>
-      <div class="project-card-bottom">
-        <span class="project-tag">Apps Script</span>
-        <span class="project-tag">Google Forms</span>
-        <span class="project-tag">Webhook Bridge</span>
-        <span class="project-tag orange">JavaScript</span>
       </div>
     </div>
 
   </div>
 </section>
 
-<!-- ============ DEMO ============ -->
 <section id="demo">
   <div class="section-label">Live Demo</div>
   <div class="section-title reveal">See It Working</div>
 
   <div class="video-container-wrap reveal">
     <p class="video-section-desc">
-      Watch the AI Lead Qualifier in action — a form submission triggers the full pipeline in real time: webhook fires, AI scores the lead, Google Sheets updates, and Telegram receives an instant alert. No manual steps. No editing. Just the system doing its job.
+      Watch the AI Lead Qualifier in action — a form submission triggers the full pipeline in real time: webhook fires, AI scores the lead, Google Sheets updates, and Telegram receives an instant alert.
     </p>
-
     <div class="video-embed-box" id="videoBox">
-      <!-- 
-        TO ADD YOUR VIDEO:
-        1. Upload your Loom video to YouTube (set as Unlisted)
-        2. Copy your YouTube video ID (the part after ?v= in the URL)
-        3. Replace YOUR_YOUTUBE_VIDEO_ID below with your actual ID
-        4. Delete the video-placeholder div
-        5. Uncomment the iframe line
-
-        Example: if your URL is https://www.youtube.com/watch?v=abc123xyz
-        Your video ID is: abc123xyz
-      -->
-
       <iframe
         src="https://www.youtube.com/embed/HDaa374IMJ8?rel=0&modestbranding=1"
         title="Lead Qualifier Demo"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
         allowfullscreen>
       </iframe>
-     
-    </div>
-
-  <!--  <div class="video-edit-note">
-      // To add your video: replace YOUR_YOUTUBE_VIDEO_ID in the source code with your actual YouTube video ID
     </div>
   </div>
 </section>
--->
 
-<!-- ============ PROCESS ============ -->
 <section id="process">
   <div class="section-label">How I Work</div>
   <div class="section-title reveal">From Brief to Deployed</div>
@@ -1559,20 +1535,9 @@ footer {
       <h4>Break It</h4>
       <p>Deliberately send wrong data, break the API key, test every error path. If the error handler works, it's done.</p>
     </div>
-    <div class="process-step">
-      <div class="process-step-num">05</div>
-      <h4>Document</h4>
-      <p>Write a plain-English SOP so your team can understand and maintain the system without me.</p>
-    </div>
-    <div class="process-step">
-      <div class="process-step-num">06</div>
-      <h4>Deliver</h4>
-      <p>Hand over working credentials, documentation, and a walkthrough video. You own it completely.</p>
-    </div>
   </div>
 </section>
 
-<!-- ============ CONTACT ============ -->
 <section id="contact">
   <div class="section-label">Let's Work Together</div>
 
@@ -1584,7 +1549,7 @@ footer {
       </p>
 
       <div class="contact-links">
-        <a href="https://www.onlinejobs.ph" target="_blank" class="contact-link">
+        <a href="https://www.onlinejobs.ph/jobseekers/info/2685788" target="_blank" class="contact-link">
           <div class="contact-link-icon">💼</div>
           <div>
             <div class="contact-link-label">Hire Me</div>
@@ -1598,43 +1563,42 @@ footer {
             <div class="contact-link-value">tadenajerielle@gmail.com</div>
           </div>
         </a>
-        <a href="https://github.com" target="_blank" class="contact-link">
-          <div class="contact-link-icon">⌨️</div>
+        <a href="https://web.facebook.com/jerielle2" target="_blank" class="contact-link">
+          <div class="contact-link-icon">👥</div>
           <div>
-            <div class="contact-link-label">GitHub</div>
-            <div class="contact-link-value">github.com/jerielletadena</div>
+            <div class="contact-link-label">Connect</div>
+            <div class="contact-link-value">Facebook Profile</div>
           </div>
         </a>
       </div>
     </div>
 
-    <div class="contact-form reveal">
+    <form action="https://formsubmit.co/tadenajerielle@gmail.com" method="POST" class="contact-form reveal">
+      <input type="hidden" name="_subject" value="New Portfolio Inquiry!">
+      <input type="hidden" name="_captcha" value="false">
+      
       <div class="form-group">
         <label class="form-label">Your Name</label>
-        <input type="text" class="form-input" placeholder="John Smith">
+        <input type="text" name="name" class="form-input" placeholder="John Smith" required>
       </div>
       <div class="form-group">
         <label class="form-label">Email Address</label>
-        <input type="email" class="form-input" placeholder="john@company.com">
+        <input type="email" name="email" class="form-input" placeholder="john@company.com" required>
       </div>
       <div class="form-group">
         <label class="form-label">What do you need automated?</label>
-        <textarea class="form-textarea" placeholder="Describe your manual process and I'll tell you if I can automate it..."></textarea>
+        <textarea name="message" class="form-textarea" placeholder="Describe your manual process and I'll tell you if I can automate it..." required></textarea>
       </div>
-      <button class="form-submit" onclick="handleFormSubmit(event)">Send Message →</button>
-    </div>
+      <button type="submit" class="form-submit">Send Message →</button>
+    </form>
   </div>
 </section>
 
-<!-- ============ FOOTER ============ -->
 <footer>
   <div class="footer-left">© 2026 Jerielle Tadena — Automation Architect</div>
   <div class="footer-right">Built with precision. Deployed with purpose.</div>
 </footer>
 
-<!-- ============ PROJECT MODALS ============ -->
-
-<!-- Modal 1: Lead Qualifier -->
 <div class="modal-overlay" id="modal1" onclick="closeModalOnOverlay(event, 'modal1')">
   <div class="modal">
     <div class="modal-header">
@@ -1645,43 +1609,22 @@ footer {
       <button class="modal-close" onclick="closeModal('modal1')">×</button>
     </div>
     <div class="modal-body">
+      
+      <div class="modal-section">
+        <div class="modal-section-label">Project Walkthrough</div>
+        <div class="video-embed-box">
+          <iframe src="https://www.youtube.com/embed/HDaa374IMJ8?rel=0&modestbranding=1" allowfullscreen></iframe>
+        </div>
+      </div>
+
       <div class="modal-section">
         <div class="modal-section-label">Problem Solved</div>
         <p>Business owners manually sorting through form submissions, guessing which leads are worth following up on. Hours wasted. Hot leads going cold.</p>
-      </div>
-      <div class="modal-section">
-        <div class="modal-section-label">Automation Flow</div>
-        <div class="flow-steps">
-          <div class="flow-step"><div class="flow-step-num">01</div><div class="flow-step-text"><strong>Google Form</strong> receives lead submission with name, business type, need, budget, and email</div></div>
-          <div class="flow-step"><div class="flow-step-num">02</div><div class="flow-step-text"><strong>Apps Script webhook bridge</strong> fires instantly and sends data to Make.com</div></div>
-          <div class="flow-step"><div class="flow-step-num">03</div><div class="flow-step-text"><strong>Google Sheets</strong> logs the raw lead data immediately as the first action</div></div>
-          <div class="flow-step"><div class="flow-step-num">04</div><div class="flow-step-text"><strong>OpenRouter AI (LLM)</strong> scores the lead 1–10 and returns JSON with score, tier, reason, and suggested action</div></div>
-          <div class="flow-step"><div class="flow-step-num">05</div><div class="flow-step-text"><strong>JSON Parser</strong> extracts score and tier as individual mappable fields</div></div>
-          <div class="flow-step"><div class="flow-step-num">06</div><div class="flow-step-text"><strong>Google Sheets updated</strong> with AI score and tier in the same row</div></div>
-          <div class="flow-step"><div class="flow-step-num">07</div><div class="flow-step-text"><strong>Router (3 paths)</strong> — Hot (≥7): Gmail alert + Telegram. Warm (4–6): auto-reply email to lead. Cold (≤3): sheet only.</div></div>
-          <div class="flow-step"><div class="flow-step-num">08</div><div class="flow-step-text"><strong>Error handler</strong> on HTTP module sends Gmail alert with error details if AI call fails</div></div>
-        </div>
-      </div>
-      <div class="modal-section">
-        <div class="modal-section-label">Tools Used</div>
-        <div class="modal-tags">
-          <span class="project-tag">Make.com</span>
-          <span class="project-tag">Google Forms</span>
-          <span class="project-tag">Apps Script</span>
-          <span class="project-tag">Webhook</span>
-          <span class="project-tag">Google Sheets</span>
-          <span class="project-tag">OpenRouter AI</span>
-          <span class="project-tag">JSON Parser</span>
-          <span class="project-tag">Gmail</span>
-          <span class="project-tag">Telegram Bot</span>
-          <span class="project-tag orange">Error Handling</span>
-        </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Modal 2: Business Monitor -->
 <div class="modal-overlay" id="modal2" onclick="closeModalOnOverlay(event, 'modal2')">
   <div class="modal">
     <div class="modal-header">
@@ -1692,40 +1635,22 @@ footer {
       <button class="modal-close" onclick="closeModal('modal2')">×</button>
     </div>
     <div class="modal-body">
+      
+      <div class="modal-section">
+        <div class="modal-section-label">Project Walkthrough</div>
+        <div class="video-embed-box">
+          <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID_HERE?rel=0&modestbranding=1" allowfullscreen></iframe>
+        </div>
+      </div>
+
       <div class="modal-section">
         <div class="modal-section-label">Problem Solved</div>
         <p>Business owner spending 20 minutes every morning checking three different tabs — website status, subscriber count, and exchange rates. Fully automated into one clean morning Telegram message.</p>
-      </div>
-      <div class="modal-section">
-        <div class="modal-section-label">Automation Flow</div>
-        <div class="flow-steps">
-          <div class="flow-step"><div class="flow-step-num">01</div><div class="flow-step-text"><strong>Schedule trigger</strong> fires every morning at 8AM Manila time (UTC+8 handled correctly)</div></div>
-          <div class="flow-step"><div class="flow-step-num">02</div><div class="flow-step-text"><strong>Google Sheets</strong> reads subscriber row count for "yesterday" metric</div></div>
-          <div class="flow-step"><div class="flow-step-num">03</div><div class="flow-step-text"><strong>HTTP: Uptime API</strong> checks if the business website is online or offline</div></div>
-          <div class="flow-step"><div class="flow-step-num">04</div><div class="flow-step-text"><strong>HTTP: Exchange Rate API</strong> fetches live USD → PHP rate (zero-signup free API)</div></div>
-          <div class="flow-step"><div class="flow-step-num">05</div><div class="flow-step-text"><strong>Data Store</strong> retrieves yesterday's exchange rate for comparison</div></div>
-          <div class="flow-step"><div class="flow-step-num">06</div><div class="flow-step-text"><strong>If/Else branch</strong> — formats an urgent alert if website is DOWN, normal summary if ONLINE</div></div>
-          <div class="flow-step"><div class="flow-step-num">07</div><div class="flow-step-text"><strong>Telegram</strong> delivers the formatted morning report with emojis and rate change indicator</div></div>
-          <div class="flow-step"><div class="flow-step-num">08</div><div class="flow-step-text"><strong>Data Store updated</strong> with today's rate for tomorrow's comparison</div></div>
-        </div>
-      </div>
-      <div class="modal-section">
-        <div class="modal-section-label">Tools Used</div>
-        <div class="modal-tags">
-          <span class="project-tag">Make.com</span>
-          <span class="project-tag">Scheduler</span>
-          <span class="project-tag">Google Sheets</span>
-          <span class="project-tag">HTTP APIs (×3)</span>
-          <span class="project-tag">Data Store</span>
-          <span class="project-tag">If/Else Logic</span>
-          <span class="project-tag orange">Telegram Bot</span>
-        </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Modal 3: Follow-up Tracker -->
 <div class="modal-overlay" id="modal3" onclick="closeModalOnOverlay(event, 'modal3')">
   <div class="modal">
     <div class="modal-header">
@@ -1736,101 +1661,22 @@ footer {
       <button class="modal-close" onclick="closeModal('modal3')">×</button>
     </div>
     <div class="modal-body">
+
+      <div class="modal-section">
+        <div class="modal-section-label">Project Walkthrough</div>
+        <div class="video-embed-box">
+          <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID_HERE?rel=0&modestbranding=1" allowfullscreen></iframe>
+        </div>
+      </div>
+
       <div class="modal-section">
         <div class="modal-section-label">Problem Solved</div>
         <p>Sales teams forgetting to follow up with warm leads. Contacts fall through the cracks. Revenue lost to simple forgetfulness.</p>
       </div>
-      <div class="modal-section">
-        <div class="modal-section-label">Automation Flow</div>
-        <div class="flow-steps">
-          <div class="flow-step"><div class="flow-step-num">01</div><div class="flow-step-text"><strong>Google Sheets Search Rows</strong> filters only contacts with Status = "Waiting"</div></div>
-          <div class="flow-step"><div class="flow-step-num">02</div><div class="flow-step-text"><strong>Text Aggregator</strong> combines all waiting contacts into a single formatted message block</div></div>
-          <div class="flow-step"><div class="flow-step-num">03</div><div class="flow-step-text"><strong>Telegram Bot</strong> delivers the daily follow-up list in one clean message</div></div>
-        </div>
-      </div>
-      <div class="modal-section">
-        <div class="modal-section-label">Key Architecture Decision</div>
-        <p>Used a Filter instead of a Router — because only one conditional output path existed. Cleaner, fewer modules, same result. Architecture over convention.</p>
-      </div>
-      <div class="modal-section">
-        <div class="modal-section-label">Tools Used</div>
-        <div class="modal-tags">
-          <span class="project-tag">Make.com</span>
-          <span class="project-tag">Google Sheets</span>
-          <span class="project-tag">Text Aggregator</span>
-          <span class="project-tag">Filter Logic</span>
-          <span class="project-tag orange">Telegram Bot API</span>
-        </div>
-      </div>
     </div>
   </div>
 </div>
 
-<!-- Modal 4: Weather Logger -->
-<div class="modal-overlay" id="modal4" onclick="closeModalOnOverlay(event, 'modal4')">
-  <div class="modal">
-    <div class="modal-header">
-      <div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);letter-spacing:0.1em;margin-bottom:8px;">04 — Weather Logger</div>
-        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:22px;letter-spacing:-0.5px;">Live Weather Data Pipeline</div>
-      </div>
-      <button class="modal-close" onclick="closeModal('modal4')">×</button>
-    </div>
-    <div class="modal-body">
-      <div class="modal-section">
-        <div class="modal-section-label">What This Demonstrates</div>
-        <p>Core API authentication skills — including diagnosing and fixing a 401 Unauthorized error by correctly identifying that OpenWeather requires an API key as a query parameter (appid), not in headers.</p>
-      </div>
-      <div class="modal-section">
-        <div class="modal-section-label">Automation Flow</div>
-        <div class="flow-steps">
-          <div class="flow-step"><div class="flow-step-num">01</div><div class="flow-step-text"><strong>HTTP GET</strong> to OpenWeather API with appid as query parameter authentication</div></div>
-          <div class="flow-step"><div class="flow-step-num">02</div><div class="flow-step-text"><strong>JSON response parsed</strong> — coord, weather description, country, city, temperature extracted</div></div>
-          <div class="flow-step"><div class="flow-step-num">03</div><div class="flow-step-text"><strong>Temperature converted</strong> from Kelvin to Celsius using round((temp - 273.15); 1)</div></div>
-          <div class="flow-step"><div class="flow-step-num">04</div><div class="flow-step-text"><strong>Filter</strong> checks if temperature exceeds 30°C threshold</div></div>
-          <div class="flow-step"><div class="flow-step-num">05</div><div class="flow-step-text"><strong>Google Sheets</strong> logs all data with live timestamp on every run</div></div>
-          <div class="flow-step"><div class="flow-step-num">06</div><div class="flow-step-text"><strong>Gmail alert</strong> fires only when temperature threshold exceeded</div></div>
-          <div class="flow-step"><div class="flow-step-num">07</div><div class="flow-step-text"><strong>Error handler</strong> catches API failures and sends Gmail notification with error code</div></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Modal 5: Form Bridge -->
-<div class="modal-overlay" id="modal5" onclick="closeModalOnOverlay(event, 'modal5')">
-  <div class="modal">
-    <div class="modal-header">
-      <div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);letter-spacing:0.1em;margin-bottom:8px;">05 — Form Integration</div>
-        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:22px;letter-spacing:-0.5px;">Google Forms → Webhook Bridge</div>
-      </div>
-      <button class="modal-close" onclick="closeModal('modal5')">×</button>
-    </div>
-    <div class="modal-body">
-      <div class="modal-section">
-        <div class="modal-section-label">The Technical Problem</div>
-        <p>Google Forms has no native webhook support. Most solutions require expensive third-party tools. This implementation uses Google Apps Script to bridge the gap at zero cost.</p>
-      </div>
-      <div class="modal-section">
-        <div class="modal-section-label">How It Works</div>
-        <div class="flow-steps">
-          <div class="flow-step"><div class="flow-step-num">01</div><div class="flow-step-text"><strong>Apps Script trigger</strong> attached to the form's onFormSubmit event</div></div>
-          <div class="flow-step"><div class="flow-step-num">02</div><div class="flow-step-text"><strong>Response data extracted</strong> by index position from the form response object</div></div>
-          <div class="flow-step"><div class="flow-step-num">03</div><div class="flow-step-text"><strong>JSON.stringify(data)</strong> automatically sanitizes all special characters before transmission</div></div>
-          <div class="flow-step"><div class="flow-step-num">04</div><div class="flow-step-text"><strong>UrlFetchApp.fetch()</strong> fires a POST request to the Make.com webhook URL instantly</div></div>
-          <div class="flow-step"><div class="flow-step-num">05</div><div class="flow-step-text"><strong>Make.com receives</strong> clean JSON with all form fields as mappable variables</div></div>
-        </div>
-      </div>
-      <div class="modal-section">
-        <div class="modal-section-label">Why This Matters</div>
-        <p>Replaces the need for paid form tools like Typeform or Tally. Any client already using Google Forms can connect to any Make.com automation instantly — no new subscriptions required.</p>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ============ JAVASCRIPT ============ -->
 <script>
 // ——— Custom Cursor ———
 const dot = document.getElementById('cursorDot');
@@ -1924,18 +1770,6 @@ document.addEventListener('keydown', e => {
     });
   }
 });
-
-// ——— Contact Form ———
-function handleFormSubmit(e) {
-  e.preventDefault();
-  const btn = e.target;
-  btn.textContent = 'Message Sent ✓';
-  btn.style.background = 'var(--accent2)';
-  setTimeout(() => {
-    btn.textContent = 'Send Message →';
-    btn.style.background = '';
-  }, 3000);
-}
 
 // ——— Smooth active nav links ———
 const sections = document.querySelectorAll('section[id]');
