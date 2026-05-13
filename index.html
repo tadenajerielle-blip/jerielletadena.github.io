@@ -7,6 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<!-- EmailJS SDK — for functional contact form -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
 /* ============================================
    ROOT & THEME SYSTEM
@@ -27,11 +29,11 @@
   --accent2: #ff6b35;
   --accent2-dim: rgba(255,107,53,0.15);
   --accent3: #7c3aed;
+  --accent3-dim: rgba(124,58,237,0.15);
   --nav-height: 72px;
   --transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   --transition-fast: 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
-
 [data-theme="light"] {
   --bg-primary: #f4f4f0;
   --bg-secondary: #ebebE6;
@@ -47,1238 +49,361 @@
   --accent-glow: rgba(0,80,208,0.3);
   --accent2: #e04e1a;
   --accent2-dim: rgba(224,78,26,0.1);
+  --accent3: #6d28d9;
+  --accent3-dim: rgba(109,40,217,0.1);
 }
 
 /* ============================================
    RESET & BASE
 ============================================ */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-html { scroll-behavior: smooth; font-size: 16px; }
-
-body {
-  font-family: 'DM Sans', sans-serif;
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  line-height: 1.6;
-  overflow-x: hidden;
-  transition: background var(--transition), color var(--transition);
-  cursor: none;
-}
-
-::selection { background: var(--accent); color: var(--bg-primary); }
-
-a { color: inherit; text-decoration: none; }
-
-img { max-width: 100%; display: block; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;font-size:16px}
+body{font-family:'DM Sans',sans-serif;background:var(--bg-primary);color:var(--text-primary);line-height:1.6;overflow-x:hidden;transition:background var(--transition),color var(--transition);cursor:none}
+::selection{background:var(--accent);color:var(--bg-primary)}
+a{color:inherit;text-decoration:none}
+img{max-width:100%;display:block}
 
 /* ============================================
    CUSTOM CURSOR
 ============================================ */
-.cursor-dot {
-  width: 6px; height: 6px;
-  background: var(--accent);
-  border-radius: 50%;
-  position: fixed;
-  top: 0; left: 0;
-  pointer-events: none;
-  z-index: 9999;
-  transform: translate(-50%, -50%);
-  transition: width 0.2s, height 0.2s, background 0.2s;
-}
-
-.cursor-ring {
-  width: 32px; height: 32px;
-  border: 1.5px solid var(--accent);
-  border-radius: 50%;
-  position: fixed;
-  top: 0; left: 0;
-  pointer-events: none;
-  z-index: 9998;
-  transform: translate(-50%, -50%);
-  transition: transform 0.1s, width 0.3s, height 0.3s, border-color 0.3s;
-  opacity: 0.6;
-}
-
-.cursor-ring.hovered {
-  width: 52px; height: 52px;
-  border-color: var(--accent2);
-  opacity: 0.4;
-}
+.cursor-dot{width:6px;height:6px;background:var(--accent);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .2s,height .2s,background .2s}
+.cursor-ring{width:32px;height:32px;border:1.5px solid var(--accent);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:transform .1s,width .3s,height .3s,border-color .3s;opacity:.6}
+.cursor-ring.hovered{width:52px;height:52px;border-color:var(--accent2);opacity:.4}
 
 /* ============================================
    SCROLLBAR
 ============================================ */
-::-webkit-scrollbar { width: 3px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 2px; }
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--accent);border-radius:2px}
 
 /* ============================================
    NAVIGATION
 ============================================ */
-nav {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  height: var(--nav-height);
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 clamp(24px, 5vw, 64px);
-  background: var(--bg-primary);
-  border-bottom: 1px solid var(--border);
-  transition: background var(--transition), border-color var(--transition), backdrop-filter 0.3s;
-}
-
-nav.scrolled {
-  background: rgba(7,7,15,0.85);
-  backdrop-filter: blur(20px);
-  border-color: var(--border-accent);
-}
-
-[data-theme="light"] nav.scrolled {
-  background: rgba(244,244,240,0.85);
-}
-
-.nav-logo {
-  font-family: 'Syne', sans-serif;
-  font-weight: 800;
-  font-size: 18px;
-  letter-spacing: -0.5px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.nav-logo span {
-  display: inline-block;
-  width: 8px; height: 8px;
-  background: var(--accent);
-  border-radius: 50%;
-  box-shadow: 0 0 12px var(--accent-glow);
-  animation: pulse 2s ease-in-out infinite;
-}
-
-.nav-links {
-  display: flex;
-  align-items: center;
-  gap: 40px;
-  list-style: none;
-}
-
-.nav-links a {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
-  font-weight: 400;
-  color: var(--text-secondary);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  transition: color var(--transition-fast);
-  position: relative;
-}
-
-.nav-links a::after {
-  content: '';
-  position: absolute;
-  bottom: -4px; left: 0;
-  width: 0; height: 1px;
-  background: var(--accent);
-  transition: width var(--transition-fast);
-}
-
-.nav-links a:hover { color: var(--text-primary); }
-.nav-links a:hover::after { width: 100%; }
-
-.nav-actions {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.theme-toggle {
-  width: 44px; height: 24px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  cursor: pointer;
-  position: relative;
-  transition: background var(--transition), border-color var(--transition);
-  flex-shrink: 0;
-}
-
-.theme-toggle::after {
-  content: '';
-  position: absolute;
-  top: 3px; left: 3px;
-  width: 16px; height: 16px;
-  background: var(--accent);
-  border-radius: 50%;
-  transition: transform var(--transition), background var(--transition);
-  box-shadow: 0 0 8px var(--accent-glow);
-}
-
-[data-theme="light"] .theme-toggle::after { transform: translateX(20px); }
-
-.nav-cta {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  padding: 8px 20px;
-  background: transparent;
-  border: 1px solid var(--accent);
-  color: var(--accent);
-  border-radius: 2px;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.nav-cta:hover {
-  background: var(--accent);
-  color: var(--bg-primary);
-}
-
-.hamburger {
-  display: none;
-  flex-direction: column;
-  gap: 5px;
-  cursor: pointer;
-  padding: 4px;
-}
-
-.hamburger span {
-  display: block;
-  width: 24px; height: 1.5px;
-  background: var(--text-primary);
-  transition: all 0.3s;
-}
+nav{position:fixed;top:0;left:0;right:0;height:var(--nav-height);z-index:1000;display:flex;align-items:center;justify-content:space-between;padding:0 clamp(24px,5vw,64px);background:var(--bg-primary);border-bottom:1px solid var(--border);transition:background var(--transition),border-color var(--transition),backdrop-filter .3s}
+nav.scrolled{background:rgba(7,7,15,0.85);backdrop-filter:blur(20px);border-color:var(--border-accent)}
+[data-theme="light"] nav.scrolled{background:rgba(244,244,240,0.85)}
+.nav-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:18px;letter-spacing:-0.5px;display:flex;align-items:center;gap:10px}
+.nav-logo span{display:inline-block;width:8px;height:8px;background:var(--accent);border-radius:50%;box-shadow:0 0 12px var(--accent-glow);animation:pulse 2s ease-in-out infinite}
+.nav-links{display:flex;align-items:center;gap:36px;list-style:none}
+.nav-links a{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-secondary);letter-spacing:.08em;text-transform:uppercase;transition:color var(--transition-fast);position:relative}
+.nav-links a::after{content:'';position:absolute;bottom:-4px;left:0;width:0;height:1px;background:var(--accent);transition:width var(--transition-fast)}
+.nav-links a:hover{color:var(--text-primary)}
+.nav-links a:hover::after{width:100%}
+.nav-actions{display:flex;align-items:center;gap:14px}
+.theme-toggle{width:44px;height:24px;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;cursor:pointer;position:relative;transition:background var(--transition),border-color var(--transition);flex-shrink:0}
+.theme-toggle::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;background:var(--accent);border-radius:50%;transition:transform var(--transition),background var(--transition);box-shadow:0 0 8px var(--accent-glow)}
+[data-theme="light"] .theme-toggle::after{transform:translateX(20px)}
+.nav-cta{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;padding:8px 20px;background:transparent;border:1px solid var(--accent);color:var(--accent);border-radius:2px;cursor:pointer;transition:all var(--transition-fast)}
+.nav-cta:hover{background:var(--accent);color:var(--bg-primary)}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px}
+.hamburger span{display:block;width:24px;height:1.5px;background:var(--text-primary);transition:all .3s}
 
 /* ============================================
    HERO SECTION
 ============================================ */
-#hero {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: calc(var(--nav-height) + 60px) clamp(24px, 5vw, 64px) 80px;
-  position: relative;
-  overflow: hidden;
-}
+#hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:calc(var(--nav-height) + 60px) clamp(24px,5vw,64px) 80px;position:relative;overflow:hidden}
+.hero-inner{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;width:100%}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:60px 60px;mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 30%,transparent 100%);pointer-events:none}
+.hero-orb{position:absolute;border-radius:50%;pointer-events:none;filter:blur(80px)}
+.hero-orb-1{width:600px;height:600px;top:-200px;right:-100px;background:radial-gradient(circle,rgba(0,229,255,0.12) 0%,transparent 70%);animation:float 8s ease-in-out infinite}
+.hero-orb-2{width:400px;height:400px;bottom:-100px;left:10%;background:radial-gradient(circle,rgba(255,107,53,0.08) 0%,transparent 70%);animation:float 12s ease-in-out infinite reverse}
+.hero-label{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:400;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:24px;opacity:0;animation:fadeUp .8s var(--transition) .2s forwards;display:flex;align-items:center;gap:12px}
+.hero-label::before{content:'';display:block;width:32px;height:1px;background:var(--accent)}
+.hero-label .status-dot{width:7px;height:7px;background:#00ff88;border-radius:50%;box-shadow:0 0 8px rgba(0,255,136,0.6);animation:blink 1.4s ease-in-out infinite}
+h1{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(40px,6vw,80px);line-height:1.0;letter-spacing:-2px;max-width:760px;opacity:0;animation:fadeUp .8s var(--transition) .4s forwards}
+h1 .line{display:block;overflow:hidden}
+h1 .accent-text{color:transparent;-webkit-text-stroke:1.5px var(--accent);display:inline-block}
+.hero-desc{font-size:clamp(15px,1.8vw,18px);color:var(--text-secondary);max-width:520px;margin-top:28px;line-height:1.75;font-weight:300;opacity:0;animation:fadeUp .8s var(--transition) .6s forwards}
+.hero-actions{display:flex;gap:16px;margin-top:40px;flex-wrap:wrap;opacity:0;animation:fadeUp .8s var(--transition) .8s forwards}
+.btn-primary{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;padding:14px 32px;background:var(--accent);color:var(--bg-primary);border:none;border-radius:2px;cursor:pointer;transition:all var(--transition-fast);display:inline-flex;align-items:center;gap:10px}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 32px var(--accent-glow)}
+.btn-secondary{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;padding:14px 32px;background:transparent;color:var(--text-secondary);border:1px solid var(--border);border-radius:2px;cursor:pointer;transition:all var(--transition-fast)}
+.btn-secondary:hover{border-color:var(--text-primary);color:var(--text-primary)}
+.hero-stats{display:flex;gap:clamp(28px,4vw,56px);margin-top:72px;padding-top:36px;border-top:1px solid var(--border);opacity:0;animation:fadeUp .8s var(--transition) 1s forwards;flex-wrap:wrap}
+.hero-stat-num{font-family:'Syne',sans-serif;font-weight:700;font-size:34px;color:var(--text-primary);letter-spacing:-1px;line-height:1}
+.hero-stat-num span{color:var(--accent)}
+.hero-stat-label{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;margin-top:4px}
 
-.hero-grid {
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(var(--border) 1px, transparent 1px),
-    linear-gradient(90deg, var(--border) 1px, transparent 1px);
-  background-size: 60px 60px;
-  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
-  pointer-events: none;
-}
-
-.hero-orb {
-  position: absolute;
-  border-radius: 50%;
-  pointer-events: none;
-  filter: blur(80px);
-}
-
-.hero-orb-1 {
-  width: 600px; height: 600px;
-  top: -200px; right: -100px;
-  background: radial-gradient(circle, rgba(0,229,255,0.12) 0%, transparent 70%);
-  animation: float 8s ease-in-out infinite;
-}
-
-.hero-orb-2 {
-  width: 400px; height: 400px;
-  bottom: -100px; left: 10%;
-  background: radial-gradient(circle, rgba(255,107,53,0.08) 0%, transparent 70%);
-  animation: float 12s ease-in-out infinite reverse;
-}
-
-.hero-label {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  font-weight: 400;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: 24px;
-  opacity: 0;
-  animation: fadeUp 0.8s var(--transition) 0.2s forwards;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.hero-label::before {
-  content: '';
-  display: block;
-  width: 32px; height: 1px;
-  background: var(--accent);
-}
-
-h1 {
-  font-family: 'Syne', sans-serif;
-  font-weight: 800;
-  font-size: clamp(48px, 7vw, 88px);
-  line-height: 1.0;
-  letter-spacing: -2px;
-  max-width: 900px;
-  opacity: 0;
-  animation: fadeUp 0.8s var(--transition) 0.4s forwards;
-}
-
-h1 .line { display: block; overflow: hidden; }
-
-h1 .accent-text {
-  color: transparent;
-  -webkit-text-stroke: 1.5px var(--accent);
-  display: inline-block;
-}
-
-[data-theme="light"] h1 .accent-text {
-  -webkit-text-stroke: 1.5px var(--accent);
-}
-
-.hero-desc {
-  font-size: clamp(16px, 2vw, 19px);
-  color: var(--text-secondary);
-  max-width: 560px;
-  margin-top: 28px;
-  line-height: 1.7;
-  font-weight: 300;
-  opacity: 0;
-  animation: fadeUp 0.8s var(--transition) 0.6s forwards;
-}
-
-.hero-actions {
-  display: flex;
-  gap: 16px;
-  margin-top: 44px;
-  flex-wrap: wrap;
-  opacity: 0;
-  animation: fadeUp 0.8s var(--transition) 0.8s forwards;
-  align-items: center;
-}
-
-.btn-primary {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  padding: 14px 32px;
-  background: var(--accent);
-  color: var(--bg-primary);
-  border: none;
-  border-radius: 2px;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 32px var(--accent-glow);
-}
-
-.btn-secondary {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  padding: 14px 32px;
-  background: transparent;
-  color: var(--text-secondary);
-  border: 1px solid var(--border);
-  border-radius: 2px;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.btn-secondary:hover {
-  border-color: var(--text-primary);
-  color: var(--text-primary);
-}
-
-/* Added Hero Social Links */
-.hero-socials {
-  display: flex;
-  gap: 12px;
-  margin-left: 10px;
-}
-.hero-social-btn {
-  width: 44px; height: 44px;
-  border: 1px solid var(--border);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-secondary);
-  transition: all var(--transition-fast);
-  font-size: 16px;
-}
-.hero-social-btn:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-  transform: translateY(-2px);
-  background: var(--accent-dim);
-}
-
-.hero-stats {
-  display: flex;
-  gap: clamp(32px, 5vw, 64px);
-  margin-top: 80px;
-  padding-top: 40px;
-  border-top: 1px solid var(--border);
-  opacity: 0;
-  animation: fadeUp 0.8s var(--transition) 1s forwards;
-  flex-wrap: wrap;
-}
-
-.hero-stat-num {
-  font-family: 'Syne', sans-serif;
-  font-weight: 700;
-  font-size: 36px;
-  color: var(--text-primary);
-  letter-spacing: -1px;
-  line-height: 1;
-}
-
-.hero-stat-num span { color: var(--accent); }
-
-.hero-stat-label {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin-top: 4px;
-}
+/* ============================================
+   HERO VISUAL DIAGRAM
+============================================ */
+.hero-visual{opacity:0;animation:fadeUp .8s var(--transition) .5s forwards;position:relative}
+.hero-diagram-card{background:var(--bg-card);border:1px solid var(--border-accent);border-radius:8px;padding:28px 24px;position:relative;overflow:hidden}
+.hero-diagram-card::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 60% 20%,rgba(0,229,255,0.06) 0%,transparent 70%)}
+.diagram-title{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted);letter-spacing:.15em;text-transform:uppercase;margin-bottom:20px;display:flex;align-items:center;gap:8px}
+.diagram-title::before{content:'●';color:#00ff88;font-size:8px}
+.flow-diagram{display:flex;flex-direction:column;gap:0}
+.flow-row{display:flex;align-items:center;gap:0}
+.fd-node{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:72px}
+.fd-icon{width:48px;height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;border:1px solid;transition:all var(--transition-fast);position:relative}
+.fd-icon.trigger{background:var(--accent-dim);border-color:var(--border-accent);animation:nodepulse 3s ease-in-out infinite}
+.fd-icon.ai{background:rgba(255,107,53,0.15);border-color:rgba(255,107,53,0.3);animation:nodepulse 3s ease-in-out infinite .5s}
+.fd-icon.db{background:rgba(124,58,237,0.15);border-color:rgba(124,58,237,0.3);animation:nodepulse 3s ease-in-out infinite 1s}
+.fd-icon.router{background:rgba(0,229,255,0.1);border-color:var(--border-accent);animation:nodepulse 3s ease-in-out infinite 1.5s}
+.fd-icon.email{background:rgba(255,107,53,0.12);border-color:rgba(255,107,53,0.25)}
+.fd-icon.telegram{background:var(--accent-dim);border-color:var(--border-accent)}
+.fd-icon.sheet{background:rgba(0,200,83,0.12);border-color:rgba(0,200,83,0.3)}
+.fd-label{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text-muted);text-align:center;letter-spacing:.04em}
+.fd-arrow{flex:1;display:flex;align-items:center;justify-content:center;color:var(--accent);font-size:14px;min-width:32px;opacity:.6}
+.fd-arrow-v{width:100%;display:flex;justify-content:center;color:var(--accent);font-size:14px;opacity:.6;margin:4px 0}
+.fd-branch{display:flex;align-items:flex-start;gap:16px;margin-top:4px;padding-left:12px}
+.fd-connector{display:flex;flex-direction:column;align-items:center;gap:0}
+.fd-connector-line{width:1px;height:32px;background:linear-gradient(var(--border-accent),transparent);margin-left:36px;margin-top:-4px}
+.diagram-badge{display:inline-flex;align-items:center;gap:6px;margin-top:20px;padding:6px 12px;background:var(--accent-dim);border:1px solid var(--border-accent);border-radius:20px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:.06em}
+.diagram-badge span{width:5px;height:5px;background:var(--accent);border-radius:50%;animation:blink 1s ease-in-out infinite}
 
 /* ============================================
    SECTION BASE
 ============================================ */
-section {
-  padding: clamp(80px, 10vw, 140px) clamp(24px, 5vw, 64px);
-}
-
-.section-label {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  font-weight: 400;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: 16px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.section-label::before {
-  content: '';
-  display: block;
-  width: 20px; height: 1px;
-  background: var(--accent);
-}
-
-.section-title {
-  font-family: 'Syne', sans-serif;
-  font-weight: 700;
-  font-size: clamp(32px, 5vw, 52px);
-  letter-spacing: -1.5px;
-  line-height: 1.05;
-  margin-bottom: 24px;
-}
+section{padding:clamp(80px,10vw,140px) clamp(24px,5vw,64px)}
+.section-label{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:400;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:16px;display:flex;align-items:center;gap:12px}
+.section-label::before{content:'';display:block;width:20px;height:1px;background:var(--accent)}
+.section-title{font-family:'Syne',sans-serif;font-weight:700;font-size:clamp(30px,5vw,52px);letter-spacing:-1.5px;line-height:1.05;margin-bottom:24px}
 
 /* ============================================
    ABOUT SECTION
 ============================================ */
-#about {
-  background: var(--bg-secondary);
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-}
-
-/* Upgraded About Layout with Profile Picture */
-.about-top-layout {
-  display: grid;
-  grid-template-columns: 280px 1fr;
-  gap: clamp(40px, 6vw, 80px);
-  align-items: center;
-  margin-top: 60px;
-  margin-bottom: 40px;
-}
-
-.profile-pic-container {
-  position: relative;
-}
-
-.profile-pic {
-  width: 100%;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid var(--accent);
-  box-shadow: 0 0 30px var(--accent-dim);
-  transition: transform var(--transition);
-}
-
-.profile-pic:hover {
-  transform: scale(1.03);
-}
-
-.about-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: clamp(40px, 6vw, 100px);
-  align-items: start;
-}
-
-.about-text p {
-  font-size: 17px;
-  color: var(--text-secondary);
-  line-height: 1.8;
-  font-weight: 300;
-  margin-bottom: 20px;
-}
-
-.about-text p strong {
-  color: var(--text-primary);
-  font-weight: 500;
-}
-
-.about-highlights {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.highlight-item {
-  padding: 20px 24px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-left: 2px solid var(--accent);
-  border-radius: 2px;
-  transition: all var(--transition-fast);
-}
-
-.highlight-item:hover {
-  border-left-color: var(--accent2);
-  background: var(--bg-card-hover);
-  transform: translateX(4px);
-}
-
-.highlight-item h4 {
-  font-family: 'Syne', sans-serif;
-  font-weight: 600;
-  font-size: 15px;
-  margin-bottom: 4px;
-}
-
-.highlight-item p {
-  font-size: 13px;
-  color: var(--text-secondary);
-  font-family: 'JetBrains Mono', monospace;
-}
+#about{background:var(--bg-secondary);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.about-grid{display:grid;grid-template-columns:auto 1fr 1fr;gap:clamp(32px,5vw,80px);align-items:start;margin-top:60px}
+.about-avatar-col{display:flex;flex-direction:column;align-items:center;gap:20px}
+.avatar-wrap{position:relative;width:160px;height:160px;flex-shrink:0}
+.avatar-ring-outer{position:absolute;inset:-6px;border-radius:50%;border:1px solid var(--border-accent);animation:spin-slow 8s linear infinite}
+.avatar-ring-inner{position:absolute;inset:-2px;border-radius:50%;border:2px solid var(--accent);box-shadow:0 0 24px var(--accent-glow),inset 0 0 24px rgba(0,229,255,0.05)}
+.avatar-img-el{width:160px;height:160px;border-radius:50%;object-fit:cover;display:block;position:relative;z-index:1}
+.avatar-fallback{width:160px;height:160px;border-radius:50%;background:linear-gradient(135deg,var(--bg-card),var(--accent-dim));display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:48px;color:var(--accent);position:relative;z-index:1;letter-spacing:-2px}
+.avatar-badge{padding:6px 14px;background:var(--accent-dim);border:1px solid var(--border-accent);border-radius:20px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:.08em;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.avatar-badge::before{content:'';width:5px;height:5px;background:#00ff88;border-radius:50%;box-shadow:0 0 6px rgba(0,255,136,.6);animation:blink 1.2s ease-in-out infinite}
+.about-text p{font-size:16px;color:var(--text-secondary);line-height:1.85;font-weight:300;margin-bottom:20px}
+.about-text p strong{color:var(--text-primary);font-weight:500}
+.about-highlights{display:flex;flex-direction:column;gap:16px}
+.highlight-item{padding:18px 22px;background:var(--bg-card);border:1px solid var(--border);border-left:2px solid var(--accent);border-radius:2px;transition:all var(--transition-fast)}
+.highlight-item:hover{border-left-color:var(--accent2);background:var(--bg-card-hover);transform:translateX(4px)}
+.highlight-item h4{font-family:'Syne',sans-serif;font-weight:600;font-size:15px;margin-bottom:4px}
+.highlight-item p{font-size:13px;color:var(--text-secondary);font-family:'JetBrains Mono',monospace}
 
 /* ============================================
    SKILLS SECTION
 ============================================ */
-#skills { background: var(--bg-primary); }
-
-.skills-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 12px;
-  margin-top: 60px;
-}
-
-.skill-chip {
-  padding: 14px 20px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 2px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
-  color: var(--text-secondary);
-  transition: all var(--transition-fast);
-  cursor: default;
-}
-
-.skill-chip:hover {
-  border-color: var(--accent);
-  color: var(--text-primary);
-  background: var(--accent-dim);
-  transform: translateY(-2px);
-}
-
-.skill-dot {
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.skill-dot.cyan { background: var(--accent); box-shadow: 0 0 8px var(--accent-glow); }
-.skill-dot.orange { background: var(--accent2); box-shadow: 0 0 8px rgba(255,107,53,0.4); }
-.skill-dot.purple { background: var(--accent3); box-shadow: 0 0 8px rgba(124,58,237,0.4); }
+#skills{background:var(--bg-primary)}
+.skills-categories{display:flex;flex-direction:column;gap:40px;margin-top:60px}
+.skills-category-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.skills-category-label.cyan{color:var(--accent)}
+.skills-category-label.cyan::before{content:'';width:12px;height:1px;background:var(--accent)}
+.skills-category-label.orange{color:var(--accent2)}
+.skills-category-label.orange::before{content:'';width:12px;height:1px;background:var(--accent2)}
+.skills-category-label.purple{color:var(--accent3)}
+.skills-category-label.purple::before{content:'';width:12px;height:1px;background:var(--accent3)}
+.skills-grid{display:flex;flex-wrap:wrap;gap:10px}
+.skill-chip{padding:12px 18px;background:var(--bg-card);border:1px solid var(--border);border-radius:2px;display:flex;align-items:center;gap:10px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-secondary);transition:all var(--transition-fast);cursor:default}
+.skill-chip:hover{color:var(--text-primary);transform:translateY(-2px)}
+.skill-chip.cyan:hover{border-color:var(--accent);background:var(--accent-dim)}
+.skill-chip.orange:hover{border-color:var(--accent2);background:var(--accent2-dim)}
+.skill-chip.purple:hover{border-color:var(--accent3);background:var(--accent3-dim)}
+.skill-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.skill-dot.cyan{background:var(--accent);box-shadow:0 0 8px var(--accent-glow)}
+.skill-dot.orange{background:var(--accent2);box-shadow:0 0 8px rgba(255,107,53,.4)}
+.skill-dot.purple{background:var(--accent3);box-shadow:0 0 8px rgba(124,58,237,.4)}
+.skill-chip .skill-icon{font-size:15px}
+.skills-learning-badge{display:inline-flex;align-items:center;gap:8px;margin-left:8px;padding:3px 10px;background:rgba(255,107,53,.1);border:1px solid rgba(255,107,53,.25);border-radius:20px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--accent2);letter-spacing:.06em;vertical-align:middle}
 
 /* ============================================
    PROJECTS SECTION
 ============================================ */
-#projects {
-  background: var(--bg-secondary);
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-}
-
-.projects-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-  gap: 20px;
-  margin-top: 60px;
-}
-
-.project-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  overflow: hidden;
-  transition: all var(--transition-fast);
-  cursor: pointer;
-  position: relative;
-}
-
-.project-card:hover {
-  border-color: var(--border-accent);
-  transform: translateY(-4px);
-  box-shadow: 0 20px 60px rgba(0,229,255,0.08);
-}
-
-/* Added Project Images */
-.project-image {
-  width: 100%;
-  height: 180px;
-  border-bottom: 1px solid var(--border);
-  overflow: hidden;
-  background: var(--bg-primary);
-}
-
-.project-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.5s ease;
-}
-
-.project-card:hover .project-image img {
-  transform: scale(1.05);
-}
-
-.project-card-top {
-  padding: 28px 28px 20px;
-  position: relative;
-}
-
-.project-card-top::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, var(--accent), transparent);
-  opacity: 0;
-  transition: opacity var(--transition-fast);
-}
-
-.project-card:hover .project-card-top::before { opacity: 1; }
-
-.project-number {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  color: var(--text-muted);
-  letter-spacing: 0.1em;
-  margin-bottom: 12px;
-}
-
-.project-title {
-  font-family: 'Syne', sans-serif;
-  font-weight: 700;
-  font-size: 20px;
-  letter-spacing: -0.5px;
-  margin-bottom: 10px;
-  line-height: 1.2;
-}
-
-.project-desc {
-  font-size: 14px;
-  color: var(--text-secondary);
-  line-height: 1.65;
-  font-weight: 300;
-}
-
-.project-card-bottom {
-  padding: 20px 28px;
-  border-top: 1px solid var(--border);
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.project-tag {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
-  letter-spacing: 0.05em;
-  padding: 4px 10px;
-  background: var(--accent-dim);
-  color: var(--accent);
-  border: 1px solid var(--border-accent);
-  border-radius: 2px;
-}
-
-.project-tag.orange {
-  background: var(--accent2-dim);
-  color: var(--accent2);
-  border-color: rgba(255,107,53,0.2);
-}
-
-.project-arrow {
-  position: absolute;
-  top: 28px; right: 28px;
-  width: 32px; height: 32px;
-  border: 1px solid var(--border);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all var(--transition-fast);
-  font-size: 14px;
-  color: var(--text-muted);
-}
-
-.project-card:hover .project-arrow {
-  border-color: var(--accent);
-  color: var(--accent);
-  background: var(--accent-dim);
-}
+#projects{background:var(--bg-secondary);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.projects-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px;margin-top:60px}
+.project-card{background:var(--bg-card);border:1px solid var(--border);border-radius:4px;overflow:hidden;transition:all var(--transition-fast);cursor:pointer;position:relative}
+.project-card:hover{border-color:var(--border-accent);transform:translateY(-4px);box-shadow:0 20px 60px rgba(0,229,255,.08)}
+.project-card-stripe{height:3px;width:100%}
+.project-card-stripe.s1{background:linear-gradient(90deg,var(--accent),rgba(0,229,255,0.2))}
+.project-card-stripe.s2{background:linear-gradient(90deg,var(--accent2),rgba(255,107,53,0.2))}
+.project-card-stripe.s3{background:linear-gradient(90deg,var(--accent3),rgba(124,58,237,0.2))}
+.project-card-stripe.s4{background:linear-gradient(90deg,#00c853,rgba(0,200,83,0.2))}
+.project-card-stripe.s5{background:linear-gradient(90deg,#ff4081,rgba(255,64,129,0.2))}
+.project-card-top{padding:24px 24px 18px;border-bottom:1px solid var(--border);position:relative}
+.project-number{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted);letter-spacing:.1em;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.project-emoji{font-size:28px;margin-bottom:12px;display:block}
+.project-title{font-family:'Syne',sans-serif;font-weight:700;font-size:19px;letter-spacing:-0.4px;margin-bottom:10px;line-height:1.2}
+.project-desc{font-size:13px;color:var(--text-secondary);line-height:1.65;font-weight:300}
+.project-card-bottom{padding:16px 24px;display:flex;flex-wrap:wrap;gap:7px}
+.project-tag{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.04em;padding:4px 10px;background:var(--accent-dim);color:var(--accent);border:1px solid var(--border-accent);border-radius:2px}
+.project-tag.orange{background:var(--accent2-dim);color:var(--accent2);border-color:rgba(255,107,53,.2)}
+.project-tag.purple{background:var(--accent3-dim);color:var(--accent3);border-color:rgba(124,58,237,.2)}
+.project-arrow{position:absolute;top:24px;right:24px;width:30px;height:30px;border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all var(--transition-fast);font-size:13px;color:var(--text-muted)}
+.project-card:hover .project-arrow{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
 
 /* ============================================
-   PROJECT MODAL & VIDEOS
+   PROJECT MODAL
 ============================================ */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(7,7,15,0.92);
-  z-index: 2000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s ease;
-  backdrop-filter: blur(8px);
-}
-
-.modal-overlay.active {
-  opacity: 1;
-  pointer-events: all;
-}
-
-[data-theme="light"] .modal-overlay {
-  background: rgba(244,244,240,0.92);
-}
-
-.modal {
-  background: var(--bg-card);
-  border: 1px solid var(--border-accent);
-  border-radius: 4px;
-  max-width: 680px;
-  width: 100%;
-  max-height: 85vh;
-  overflow-y: auto;
-  transform: translateY(20px) scale(0.97);
-  transition: transform 0.3s var(--transition);
-}
-
-.modal-overlay.active .modal {
-  transform: translateY(0) scale(1);
-}
-
-.modal-header {
-  padding: 32px 36px 24px;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 16px;
-  position: sticky;
-  top: 0;
-  background: var(--bg-card);
-  z-index: 1;
-}
-
-.modal-close {
-  width: 36px; height: 36px;
-  border: 1px solid var(--border);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  flex-shrink: 0;
-  font-size: 18px;
-  color: var(--text-secondary);
-  transition: all var(--transition-fast);
-  background: transparent;
-}
-
-.modal-close:hover {
-  border-color: var(--accent2);
-  color: var(--accent2);
-}
-
-.modal-body { padding: 32px 36px 40px; }
-
-.modal-section { margin-bottom: 28px; }
-
-.modal-section-label {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: 10px;
-}
-
-.modal-section p {
-  font-size: 15px;
-  color: var(--text-secondary);
-  line-height: 1.75;
-  font-weight: 300;
-}
-
-.flow-steps {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
-.flow-step {
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
-  padding: 14px 0;
-  border-bottom: 1px solid var(--border);
-}
-
-.flow-step:last-child { border-bottom: none; }
-
-.flow-step-num {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  color: var(--accent);
-  min-width: 28px;
-  margin-top: 2px;
-}
-
-.flow-step-text {
-  font-size: 14px;
-  color: var(--text-secondary);
-  line-height: 1.5;
-}
-
-.flow-step-text strong {
-  color: var(--text-primary);
-  font-weight: 500;
-}
-
-.modal-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-/* Reusable Video Box for Modals & Demo */
-.video-embed-box {
-  position: relative;
-  background: var(--bg-primary);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  overflow: hidden;
-  aspect-ratio: 16/9;
-  width: 100%;
-  margin-top: 10px;
-}
-
-.video-embed-box iframe {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  border: none;
-}
+.modal-overlay{position:fixed;inset:0;background:rgba(7,7,15,.92);z-index:2000;display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;pointer-events:none;transition:opacity .3s ease;backdrop-filter:blur(8px)}
+.modal-overlay.active{opacity:1;pointer-events:all}
+[data-theme="light"] .modal-overlay{background:rgba(244,244,240,.92)}
+.modal{background:var(--bg-card);border:1px solid var(--border-accent);border-radius:4px;max-width:720px;width:100%;max-height:88vh;overflow-y:auto;transform:translateY(20px) scale(.97);transition:transform .3s var(--transition)}
+.modal-overlay.active .modal{transform:translateY(0) scale(1)}
+.modal-header{padding:28px 32px 22px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:flex-start;gap:16px;position:sticky;top:0;background:var(--bg-card);z-index:1}
+.modal-close{width:34px;height:34px;border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:18px;color:var(--text-secondary);transition:all var(--transition-fast);background:transparent}
+.modal-close:hover{border-color:var(--accent2);color:var(--accent2)}
+.modal-body{padding:28px 32px 36px}
+.modal-section{margin-bottom:26px}
+.modal-section-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+.modal-section p{font-size:14px;color:var(--text-secondary);line-height:1.75;font-weight:300}
+.flow-steps{display:flex;flex-direction:column;gap:0}
+.flow-step{display:flex;align-items:flex-start;gap:14px;padding:12px 0;border-bottom:1px solid var(--border)}
+.flow-step:last-child{border-bottom:none}
+.flow-step-num{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent);min-width:26px;margin-top:2px}
+.flow-step-text{font-size:13px;color:var(--text-secondary);line-height:1.5}
+.flow-step-text strong{color:var(--text-primary);font-weight:500}
+.modal-tags{display:flex;flex-wrap:wrap;gap:7px}
+/* Modal Video */
+.modal-video-section{margin-bottom:26px}
+.modal-video-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+.modal-video-box{position:relative;border-radius:4px;overflow:hidden;aspect-ratio:16/9;background:var(--bg-secondary);border:1px solid var(--border)}
+.modal-video-box iframe{position:absolute;inset:0;width:100%;height:100%;border:none}
+.modal-video-placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
+.modal-video-placeholder .play-ring{width:56px;height:56px;border:1.5px solid var(--border-accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--accent);position:relative}
+.modal-video-placeholder .play-ring::before{content:'';position:absolute;inset:-8px;border:1px solid var(--border-accent);border-radius:50%;animation:ripple 2s ease-out infinite}
+.modal-video-placeholder p{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);letter-spacing:.08em;text-align:center}
+.modal-video-tip{margin-top:8px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted);padding:7px 12px;background:var(--accent-dim);border:1px solid var(--border-accent);border-radius:2px;display:inline-block}
 
 /* ============================================
-   DEMO VIDEO SECTION
+   DEMO SECTION
 ============================================ */
-#demo {
-  background: var(--bg-primary);
-}
-
-.video-container-wrap {
-  margin-top: 60px;
-  max-width: 900px;
-}
-
-.video-section-desc {
-  font-size: 16px;
-  color: var(--text-secondary);
-  line-height: 1.75;
-  font-weight: 300;
-  max-width: 600px;
-  margin-bottom: 40px;
-}
+#demo{background:var(--bg-primary)}
+.video-container-wrap{margin-top:60px;max-width:900px}
+.video-section-desc{font-size:16px;color:var(--text-secondary);line-height:1.75;font-weight:300;max-width:600px;margin-bottom:40px}
+.video-embed-box{position:relative;background:var(--bg-card);border:1px solid var(--border);border-radius:4px;overflow:hidden;aspect-ratio:16/9;width:100%}
+.video-embed-box iframe{position:absolute;inset:0;width:100%;height:100%;border:none}
 
 /* ============================================
    PROCESS SECTION
 ============================================ */
-#process {
-  background: var(--bg-secondary);
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-}
+#process{background:var(--bg-secondary);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.process-steps{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1px;margin-top:60px;background:var(--border);border:1px solid var(--border)}
+.process-step{padding:32px 24px;background:var(--bg-secondary);transition:background var(--transition-fast)}
+.process-step:hover{background:var(--bg-card-hover)}
+.process-step-num{font-family:'JetBrains Mono',monospace;font-size:34px;font-weight:300;color:var(--border);line-height:1;margin-bottom:18px;transition:color var(--transition-fast)}
+.process-step:hover .process-step-num{color:var(--accent)}
+.process-step h4{font-family:'Syne',sans-serif;font-weight:600;font-size:15px;margin-bottom:8px;letter-spacing:-0.3px}
+.process-step p{font-size:13px;color:var(--text-secondary);line-height:1.6;font-weight:300}
 
-.process-steps {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 1px;
-  margin-top: 60px;
-  background: var(--border);
-  border: 1px solid var(--border);
-}
-
-.process-step {
-  padding: 36px 28px;
-  background: var(--bg-secondary);
-  transition: background var(--transition-fast);
-}
-
-.process-step:hover { background: var(--bg-card-hover); }
-
-.process-step-num {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 36px;
-  font-weight: 300;
-  color: var(--border);
-  line-height: 1;
-  margin-bottom: 20px;
-  transition: color var(--transition-fast);
-}
-
-.process-step:hover .process-step-num { color: var(--accent); }
-
-.process-step h4 {
-  font-family: 'Syne', sans-serif;
-  font-weight: 600;
-  font-size: 16px;
-  margin-bottom: 10px;
-  letter-spacing: -0.3px;
-}
-
-.process-step p {
-  font-size: 13px;
-  color: var(--text-secondary);
-  line-height: 1.65;
-  font-weight: 300;
-}
+/* ============================================
+   SOCIAL BUTTONS
+============================================ */
+.social-buttons-section{padding:clamp(40px,6vw,80px) clamp(24px,5vw,64px);background:var(--bg-primary);border-top:1px solid var(--border)}
+.social-buttons-inner{display:flex;flex-direction:column;gap:16px}
+.social-buttons-label{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px}
+.social-btns-row{display:flex;flex-wrap:wrap;gap:12px}
+.social-btn{display:inline-flex;align-items:center;gap:12px;padding:13px 24px;background:var(--bg-card);border:1px solid var(--border);border-radius:3px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-secondary);transition:all var(--transition-fast);letter-spacing:.04em;cursor:pointer}
+.social-btn:hover{color:var(--text-primary);transform:translateY(-2px)}
+.social-btn.fb:hover{border-color:#1877f2;background:rgba(24,119,242,.1);color:#1877f2}
+.social-btn.gmail:hover{border-color:#ea4335;background:rgba(234,67,53,.1);color:#ea4335}
+.social-btn.ojph:hover{border-color:#f59e0b;background:rgba(245,158,11,.1);color:#f59e0b}
+.social-btn.github:hover{border-color:var(--accent);background:var(--accent-dim);color:var(--accent)}
+.social-btn-icon{font-size:18px;flex-shrink:0}
+.social-btn-text{}
+.social-btn-arrow{margin-left:auto;opacity:.4;font-size:12px}
 
 /* ============================================
    CONTACT SECTION
 ============================================ */
-#contact { background: var(--bg-primary); }
-
-.contact-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: clamp(40px, 6vw, 100px);
-  margin-top: 60px;
-  align-items: start;
-}
-
-.contact-info h3 {
-  font-family: 'Syne', sans-serif;
-  font-weight: 700;
-  font-size: clamp(28px, 4vw, 42px);
-  letter-spacing: -1.5px;
-  line-height: 1.1;
-  margin-bottom: 20px;
-}
-
-.contact-info h3 span { color: var(--accent); }
-
-.contact-info p {
-  font-size: 16px;
-  color: var(--text-secondary);
-  line-height: 1.75;
-  font-weight: 300;
-  margin-bottom: 40px;
-}
-
-.contact-links {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.contact-link {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 16px 20px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 2px;
-  transition: all var(--transition-fast);
-  color: var(--text-secondary);
-  font-size: 14px;
-}
-
-.contact-link:hover {
-  border-color: var(--accent);
-  color: var(--text-primary);
-  transform: translateX(4px);
-}
-
-.contact-link-icon {
-  width: 36px; height: 36px;
-  background: var(--accent-dim);
-  border: 1px solid var(--border-accent);
-  border-radius: 2px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-  flex-shrink: 0;
-}
-
-.contact-link-label {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin-bottom: 2px;
-}
-
-.contact-link-value {
-  font-size: 14px;
-  color: var(--text-primary);
-}
-
-.contact-form {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.form-label {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-}
-
-.form-input, .form-textarea {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 2px;
-  padding: 14px 16px;
-  color: var(--text-primary);
-  font-family: 'DM Sans', sans-serif;
-  font-size: 15px;
-  font-weight: 300;
-  transition: border-color var(--transition-fast);
-  width: 100%;
-  outline: none;
-}
-
-.form-input:focus, .form-textarea:focus {
-  border-color: var(--accent);
-}
-
-.form-input::placeholder, .form-textarea::placeholder {
-  color: var(--text-muted);
-}
-
-.form-textarea {
-  resize: vertical;
-  min-height: 120px;
-}
-
-.form-submit {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  padding: 16px 32px;
-  background: var(--accent);
-  color: var(--bg-primary);
-  border: none;
-  border-radius: 2px;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  width: 100%;
-  margin-top: 8px;
-}
-
-.form-submit:hover {
-  box-shadow: 0 8px 32px var(--accent-glow);
-  transform: translateY(-2px);
-}
+#contact{background:var(--bg-secondary);border-top:1px solid var(--border)}
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(40px,6vw,100px);margin-top:60px;align-items:start}
+.contact-info h3{font-family:'Syne',sans-serif;font-weight:700;font-size:clamp(26px,4vw,40px);letter-spacing:-1.5px;line-height:1.1;margin-bottom:20px}
+.contact-info h3 span{color:var(--accent)}
+.contact-info p{font-size:15px;color:var(--text-secondary);line-height:1.8;font-weight:300;margin-bottom:36px}
+.contact-links{display:flex;flex-direction:column;gap:10px}
+.contact-link{display:flex;align-items:center;gap:14px;padding:14px 18px;background:var(--bg-card);border:1px solid var(--border);border-radius:2px;transition:all var(--transition-fast);color:var(--text-secondary);font-size:14px}
+.contact-link:hover{border-color:var(--accent);color:var(--text-primary);transform:translateX(4px)}
+.contact-link-icon{width:34px;height:34px;background:var(--accent-dim);border:1px solid var(--border-accent);border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.contact-link-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:2px}
+.contact-link-value{font-size:13px;color:var(--text-primary)}
+.contact-form{display:flex;flex-direction:column;gap:14px}
+.form-group{display:flex;flex-direction:column;gap:7px}
+.form-label{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted)}
+.form-input,.form-textarea{background:var(--bg-card);border:1px solid var(--border);border-radius:2px;padding:13px 15px;color:var(--text-primary);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:300;transition:border-color var(--transition-fast);width:100%;outline:none}
+.form-input:focus,.form-textarea:focus{border-color:var(--accent)}
+.form-input::placeholder,.form-textarea::placeholder{color:var(--text-muted)}
+.form-textarea{resize:vertical;min-height:120px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-submit{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;padding:15px 32px;background:var(--accent);color:var(--bg-primary);border:none;border-radius:2px;cursor:pointer;transition:all var(--transition-fast);width:100%;margin-top:6px}
+.form-submit:hover{box-shadow:0 8px 32px var(--accent-glow);transform:translateY(-2px)}
+.form-submit.sending{opacity:.7;pointer-events:none}
+.form-submit.success{background:#00c853}
+.form-submit.error-state{background:var(--accent2)}
+.form-status{font-family:'JetBrains Mono',monospace;font-size:11px;padding:10px 14px;border-radius:2px;margin-top:6px;display:none}
+.form-status.show{display:block}
+.form-status.success{background:rgba(0,200,83,.1);border:1px solid rgba(0,200,83,.3);color:#00c853}
+.form-status.error{background:rgba(255,107,53,.1);border:1px solid rgba(255,107,53,.3);color:var(--accent2)}
 
 /* ============================================
    FOOTER
 ============================================ */
-footer {
-  padding: 32px clamp(24px, 5vw, 64px);
-  border-top: 1px solid var(--border);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 16px;
-}
-
-.footer-left {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  color: var(--text-muted);
-  letter-spacing: 0.05em;
-}
-
-.footer-right {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  color: var(--text-muted);
-  letter-spacing: 0.05em;
-}
+footer{padding:32px clamp(24px,5vw,64px);border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+.footer-left{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);letter-spacing:.05em}
+.footer-right{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);letter-spacing:.05em}
+.footer-socials{display:flex;gap:14px}
+.footer-social{width:34px;height:34px;border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;transition:all var(--transition-fast);color:var(--text-muted)}
+.footer-social:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-2px)}
 
 /* ============================================
    ANIMATIONS
 ============================================ */
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(24px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-30px); }
-}
-
-@keyframes pulse {
-  0%, 100% { box-shadow: 0 0 12px var(--accent-glow); }
-  50% { box-shadow: 0 0 24px var(--accent-glow), 0 0 40px var(--accent-glow); }
-}
-
-@keyframes ripple {
-  from { transform: scale(1); opacity: 0.6; }
-  to { transform: scale(1.5); opacity: 0; }
-}
-
-/* Scroll reveal */
-.reveal {
-  opacity: 0;
-  transform: translateY(32px);
-  transition: opacity 0.7s ease, transform 0.7s ease;
-}
-
-.reveal.visible {
-  opacity: 1;
-  transform: none;
-}
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-30px)}}
+@keyframes pulse{0%,100%{box-shadow:0 0 12px var(--accent-glow)}50%{box-shadow:0 0 24px var(--accent-glow),0 0 40px var(--accent-glow)}}
+@keyframes ripple{from{transform:scale(1);opacity:.6}to{transform:scale(1.5);opacity:0}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes spin-slow{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes nodepulse{0%,100%{box-shadow:0 0 0 0 transparent}50%{box-shadow:0 0 12px var(--accent-glow)}}
+@keyframes flow-pulse{0%{stroke-dashoffset:100}100%{stroke-dashoffset:0}}
+.reveal{opacity:0;transform:translateY(32px);transition:opacity .7s ease,transform .7s ease}
+.reveal.visible{opacity:1;transform:none}
 
 /* ============================================
-   MOBILE NAV & RESPONSIVE
+   MOBILE NAV & MENU
 ============================================ */
-.mobile-menu {
-  position: fixed;
-  inset: 0;
-  background: var(--bg-primary);
-  z-index: 999;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 36px;
-  transform: translateX(100%);
-  transition: transform var(--transition);
+.mobile-menu{position:fixed;inset:0;background:var(--bg-primary);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:36px;transform:translateX(100%);transition:transform var(--transition)}
+.mobile-menu.open{transform:none}
+.mobile-menu a{font-family:'Syne',sans-serif;font-weight:700;font-size:36px;color:var(--text-secondary);transition:color var(--transition-fast)}
+.mobile-menu a:hover{color:var(--accent)}
+
+/* ============================================
+   RESPONSIVE
+============================================ */
+@media(max-width:1100px){
+  .hero-inner{grid-template-columns:1fr}
+  .hero-visual{display:none}
 }
-
-.mobile-menu.open { transform: none; }
-
-.mobile-menu a {
-  font-family: 'Syne', sans-serif;
-  font-weight: 700;
-  font-size: 36px;
-  color: var(--text-secondary);
-  transition: color var(--transition-fast);
+@media(max-width:900px){
+  .nav-links,.nav-cta{display:none}
+  .hamburger{display:flex}
+  .about-grid{grid-template-columns:1fr}
+  .about-avatar-col{flex-direction:row;align-items:center;gap:20px;width:100%}
+  .contact-grid{grid-template-columns:1fr}
 }
-
-.mobile-menu a:hover { color: var(--accent); }
-
-@media (max-width: 900px) {
-  .nav-links { display: none; }
-  .nav-cta { display: none; }
-  .hamburger { display: flex; }
-  .about-top-layout { grid-template-columns: 1fr; text-align: center; }
-  .profile-pic-container { max-width: 280px; margin: 0 auto; }
-  .about-grid { grid-template-columns: 1fr; }
-  .contact-grid { grid-template-columns: 1fr; }
+@media(max-width:640px){
+  .projects-grid{grid-template-columns:1fr}
+  .process-steps{grid-template-columns:1fr 1fr}
+  .form-row{grid-template-columns:1fr}
+  .social-btns-row{flex-direction:column}
 }
-
-@media (max-width: 640px) {
-  .projects-grid { grid-template-columns: 1fr; }
-  .process-steps { grid-template-columns: 1fr 1fr; }
-  .hero-stats { gap: 28px; }
-}
-
-@media (max-width: 480px) {
-  .process-steps { grid-template-columns: 1fr; }
-  body { cursor: auto; }
-  .cursor-dot, .cursor-ring { display: none; }
+@media(max-width:480px){
+  .process-steps{grid-template-columns:1fr}
+  body{cursor:auto}
+  .cursor-dot,.cursor-ring{display:none}
+  .social-btn{width:100%}
 }
 </style>
 </head>
 <body>
 
+<!-- Custom Cursor -->
 <div class="cursor-dot" id="cursorDot"></div>
 <div class="cursor-ring" id="cursorRing"></div>
 
+<!-- Navigation -->
 <nav id="mainNav">
-  <div class="nav-logo">
-    <span></span>
-    Jerielle Tadena
-  </div>
+  <div class="nav-logo"><span></span>Jerielle Tadena</div>
   <ul class="nav-links">
     <li><a href="#about">About</a></li>
     <li><a href="#skills">Skills</a></li>
@@ -1289,12 +414,11 @@ footer {
   <div class="nav-actions">
     <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme"></button>
     <a href="#contact" class="nav-cta">Hire Me</a>
-    <div class="hamburger" id="hamburger">
-      <span></span><span></span><span></span>
-    </div>
+    <div class="hamburger" id="hamburger"><span></span><span></span><span></span></div>
   </div>
 </nav>
 
+<!-- Mobile Menu -->
 <div class="mobile-menu" id="mobileMenu">
   <a href="#about" onclick="closeMobile()">About</a>
   <a href="#skills" onclick="closeMobile()">Skills</a>
@@ -1303,75 +427,143 @@ footer {
   <a href="#contact" onclick="closeMobile()">Contact</a>
 </div>
 
+<!-- ============ HERO ============ -->
 <section id="hero">
   <div class="hero-grid"></div>
   <div class="hero-orb hero-orb-1"></div>
   <div class="hero-orb hero-orb-2"></div>
 
-  <div class="hero-label">Available for Remote Work</div>
+  <div class="hero-inner">
+    <!-- Left: Content -->
+    <div class="hero-content">
+      <div class="hero-label">
+        <span class="status-dot"></span>Available for Remote Work
+      </div>
 
-  <h1>
-    <span class="line">I Build</span>
-    <span class="line"><span class="accent-text">Automations</span></span>
-    <span class="line">That Work.</span>
-  </h1>
+      <h1>
+        <span class="line">I Build</span>
+        <span class="line"><span class="accent-text">Automations</span></span>
+        <span class="line">That Work.</span>
+      </h1>
 
-  <p class="hero-desc">
-    AI Automation Specialist & Technical VA. I design and build intelligent workflow systems using Make.com, Webhooks, and AI APIs — so businesses stop doing things manually.
-  </p>
+      <p class="hero-desc">
+        AI Automation Specialist & Technical VA. I design and build intelligent workflow systems using Make.com, n8n, Zapier, and AI APIs — so businesses stop doing things manually.
+      </p>
 
-  <div class="hero-actions">
-    <a href="#projects" class="btn-primary">View My Work →</a>
-    <a href="#contact" class="btn-secondary">Get In Touch</a>
-    
-    <div class="hero-socials">
-      <a href="https://web.facebook.com/jerielle2" target="_blank" class="hero-social-btn" title="Facebook">f</a>
-      <a href="https://www.onlinejobs.ph/jobseekers/info/2685788" target="_blank" class="hero-social-btn" title="OnlineJobs.ph">💼</a>
-    </div>
-  </div>
+      <div class="hero-actions">
+        <a href="#projects" class="btn-primary">View My Work →</a>
+        <a href="#contact" class="btn-secondary">Get In Touch</a>
+      </div>
 
-  <div class="hero-stats">
-    <div>
-      <div class="hero-stat-num">5<span>+</span></div>
-      <div class="hero-stat-label">Live Automations Built</div>
+      <div class="hero-stats">
+        <div>
+          <div class="hero-stat-num">5<span>+</span></div>
+          <div class="hero-stat-label">Live Automations Built</div>
+        </div>
+        <div>
+          <div class="hero-stat-num">8<span>+</span></div>
+          <div class="hero-stat-label">Platforms Mastered</div>
+        </div>
+        <div>
+          <div class="hero-stat-num">0<span>hrs</span></div>
+          <div class="hero-stat-label">Manual Work After Deploy</div>
+        </div>
+        <div>
+          <div class="hero-stat-num">$5<span>/hr</span></div>
+          <div class="hero-stat-label">Starting Rate</div>
+        </div>
+      </div>
     </div>
-    <div>
-      <div class="hero-stat-num">3<span>×</span></div>
-      <div class="hero-stat-label">API Providers Integrated</div>
-    </div>
-    <div>
-      <div class="hero-stat-num">0<span>hrs</span></div>
-      <div class="hero-stat-label">Manual Work After Deploy</div>
-    </div>
-    <div>
-      <div class="hero-stat-num">$5<span>/hr</span></div>
-      <div class="hero-stat-label">Starting Rate</div>
+
+    <!-- Right: Automation Flow Diagram -->
+    <div class="hero-visual">
+      <div class="hero-diagram-card">
+        <div class="diagram-title">Live Automation Pipeline</div>
+        <div class="flow-diagram">
+          <!-- Row 1: FORM → WEBHOOK → AI → SHEETS -->
+          <div class="flow-row">
+            <div class="fd-node">
+              <div class="fd-icon trigger">📋</div>
+              <div class="fd-label">FORM</div>
+            </div>
+            <div class="fd-arrow">──►</div>
+            <div class="fd-node">
+              <div class="fd-icon ai">⚡</div>
+              <div class="fd-label">WEBHOOK</div>
+            </div>
+            <div class="fd-arrow">──►</div>
+            <div class="fd-node">
+              <div class="fd-icon ai" style="background:rgba(255,107,53,.15);border-color:rgba(255,107,53,.3)">🤖</div>
+              <div class="fd-label">AI SCORE</div>
+            </div>
+            <div class="fd-arrow">──►</div>
+            <div class="fd-node">
+              <div class="fd-icon db">📊</div>
+              <div class="fd-label">SHEETS</div>
+            </div>
+          </div>
+          <!-- Arrow down -->
+          <div style="display:flex;padding-left:calc(50% + 24px)">
+            <div class="fd-arrow-v">▼</div>
+          </div>
+          <!-- Row 2: ROUTER + branches -->
+          <div class="flow-row" style="justify-content:center">
+            <div class="fd-node">
+              <div class="fd-icon router">🔀</div>
+              <div class="fd-label">ROUTER</div>
+            </div>
+          </div>
+          <!-- Branch arrows -->
+          <div style="display:flex;justify-content:center;gap:32px;margin:8px 0 4px">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent)">HOT ▼</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted)">WARM ▼</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted)">COLD ▼</span>
+          </div>
+          <!-- Row 3: Actions -->
+          <div class="flow-row" style="justify-content:center;gap:16px">
+            <div class="fd-node">
+              <div class="fd-icon email">✉️</div>
+              <div class="fd-label">GMAIL</div>
+            </div>
+            <div class="fd-node">
+              <div class="fd-icon telegram">📱</div>
+              <div class="fd-label">TELEGRAM</div>
+            </div>
+            <div class="fd-node">
+              <div class="fd-icon sheet" style="font-size:16px">📝</div>
+              <div class="fd-label">LOG</div>
+            </div>
+          </div>
+        </div>
+        <div class="diagram-badge"><span></span>Running · Make.com · 0 errors</div>
+      </div>
     </div>
   </div>
 </section>
 
+<!-- ============ ABOUT ============ -->
 <section id="about">
   <div class="section-label">About Me</div>
   <div class="section-title reveal">The Architect Behind the Systems</div>
 
-  <div class="about-top-layout">
-    <div class="profile-pic-container reveal">
-      <img src="https://images.unsplash.com/photo-1573164713988-8665fc963095?auto=format&fit=crop&q=80&w=400&h=400" alt="Jerielle Tadena" class="profile-pic">
-    </div>
+  <div class="about-grid">
+    <!-- Avatar Column -->
+    <img src="images/profile.jpg" alt="Jerielle Tadena" class="avatar-img-el"
+onerror="this.style.display='none';document.getElementById('avatarFallback').style.display='flex'">
+    <!-- Bio Column -->
     <div class="about-text reveal">
       <p>
-        I'm <strong>Jerielle Tadena</strong>, a Senior High School ICT student from the Philippines resided here on Metro Manila, driven by the challenge of creating secure and efficient technology solutions. My journey began with a focus on core IT skills like PC troubleshooting and networking, but I have since channeled my energy into specializing in Cybersecurity and modern Virtual Assistance.
+        I'm <strong>Jerielle Tadena</strong>, a Senior High School ICT student from Metro Manila, Philippines — driven by the challenge of creating secure and efficient technology solutions. My journey began with core IT skills like PC troubleshooting and networking, but I've since channeled that energy into specializing in AI automation and modern Virtual Assistance.
       </p>
       <p>
-        My background in Java and Python gave me a strong foundation in logic and systems thinking. I applied that to no-code automation — and the result is a skill set that most VAs twice my experience don't have.
+        My background in Java and Python gave me a strong foundation in logic and systems thinking. I applied that to no-code/low-code automation — and the result is a skill set that most VAs twice my experience don't have. Now expanding into <strong>n8n, Zapier, HubSpot CRM, Notion, and advanced AI platforms</strong> like Claude, OpenAI, and Groq.
       </p>
       <p>
         Every system I build is <strong>production-grade</strong>: error-handled, documented, and built to run without breaking. I don't just connect apps. I architect reliable pipelines.
       </p>
     </div>
-  </div>
 
-  <div class="about-grid">
+    <!-- Highlights Column -->
     <div class="about-highlights reveal">
       <div class="highlight-item">
         <h4>Fixer Mentality</h4>
@@ -1379,10 +571,8 @@ footer {
       </div>
       <div class="highlight-item">
         <h4>Systems Thinker</h4>
-        <p>Every Make.com Router is an if/else. Every Iterator is a for-loop.</p>
+        <p>Every Router is an if/else. Every Iterator is a for-loop.</p>
       </div>
-    </div>
-    <div class="about-highlights reveal">
       <div class="highlight-item">
         <h4>Fast Learner</h4>
         <p>New API? Docs open. Built in an afternoon.</p>
@@ -1391,58 +581,113 @@ footer {
         <h4>Client-Value Focused</h4>
         <p>I think about saving money for clients, not just connecting apps.</p>
       </div>
+      <div class="highlight-item">
+        <h4>Always Learning</h4>
+        <p>Currently expanding into n8n, HubSpot, and multi-AI pipelines.</p>
+      </div>
     </div>
   </div>
 </section>
 
+<!-- ============ SKILLS ============ -->
 <section id="skills">
   <div class="section-label">Tech Stack</div>
   <div class="section-title reveal">Tools I Build With</div>
 
-  <div class="skills-grid reveal">
-    <div class="skill-chip"><span class="skill-dot cyan"></span>Make.com</div>
-    <div class="skill-chip"><span class="skill-dot cyan"></span>Webhooks</div>
-    <div class="skill-chip"><span class="skill-dot cyan"></span>HTTP / REST APIs</div>
-    <div class="skill-chip"><span class="skill-dot cyan"></span>JSON Parsing</div>
-    <div class="skill-chip"><span class="skill-dot purple"></span>n8n</div>
-    <div class="skill-chip"><span class="skill-dot purple"></span>Zapier</div>
-    
-    <div class="skill-chip"><span class="skill-dot cyan"></span>HubSpot CRM</div>
-    <div class="skill-chip"><span class="skill-dot cyan"></span>WordPress</div>
-    <div class="skill-chip"><span class="skill-dot cyan"></span>Notion</div>
-    <div class="skill-chip"><span class="skill-dot cyan"></span>Microsoft Tools</div>
-    <div class="skill-chip"><span class="skill-dot cyan"></span>Google Sheets</div>
-    <div class="skill-chip"><span class="skill-dot cyan"></span>Google Forms</div>
-    <div class="skill-chip"><span class="skill-dot cyan"></span>Gmail Automation</div>
-    
-    <div class="skill-chip"><span class="skill-dot orange"></span>Claude API</div>
-    <div class="skill-chip"><span class="skill-dot orange"></span>OpenAI / ChatGPT</div>
-    <div class="skill-chip"><span class="skill-dot orange"></span>Gemini API</div>
-    <div class="skill-chip"><span class="skill-dot orange"></span>OpenRouter AI</div>
-    <div class="skill-chip"><span class="skill-dot orange"></span>Groq</div>
-    <div class="skill-chip"><span class="skill-dot orange"></span>Prompt Engineering</div>
-    
-    <div class="skill-chip"><span class="skill-dot purple"></span>Google Apps Script</div>
-    <div class="skill-chip"><span class="skill-dot purple"></span>JavaScript</div>
-    <div class="skill-chip"><span class="skill-dot purple"></span>Python (Basic)</div>
-    <div class="skill-chip"><span class="skill-dot purple"></span>Java Logic</div>
-    <div class="skill-chip"><span class="skill-dot cyan"></span>Data Stores</div>
-    <div class="skill-chip"><span class="skill-dot orange"></span>Postman</div>
+  <div class="skills-categories">
+
+    <!-- Automation Platforms -->
+    <div class="reveal">
+      <div class="skills-category-label cyan">⚡ Automation Platforms</div>
+      <div class="skills-grid">
+        <div class="skill-chip cyan"><span class="skill-dot cyan"></span><span class="skill-icon">⚙️</span>Make.com</div>
+        <div class="skill-chip cyan"><span class="skill-dot cyan"></span><span class="skill-icon">🔀</span>n8n <span class="skills-learning-badge">Learning</span></div>
+        <div class="skill-chip cyan"><span class="skill-dot cyan"></span><span class="skill-icon">⚡</span>Zapier <span class="skills-learning-badge">Learning</span></div>
+        <div class="skill-chip cyan"><span class="skill-dot cyan"></span><span class="skill-icon">🔗</span>Webhooks</div>
+        <div class="skill-chip cyan"><span class="skill-dot cyan"></span><span class="skill-icon">🌐</span>HTTP / REST APIs</div>
+        <div class="skill-chip cyan"><span class="skill-dot cyan"></span><span class="skill-icon">📦</span>JSON Parsing</div>
+        <div class="skill-chip cyan"><span class="skill-dot cyan"></span><span class="skill-icon">🛣️</span>Router / Filter Logic</div>
+        <div class="skill-chip cyan"><span class="skill-dot cyan"></span><span class="skill-icon">🛡️</span>Error Handling</div>
+        <div class="skill-chip cyan"><span class="skill-dot cyan"></span><span class="skill-icon">💾</span>Data Stores</div>
+      </div>
+    </div>
+
+    <!-- AI & Language Models -->
+    <div class="reveal">
+      <div class="skills-category-label orange">🤖 AI & Language Models</div>
+      <div class="skills-grid">
+        <div class="skill-chip orange"><span class="skill-dot orange"></span><span class="skill-icon">🔶</span>OpenRouter AI</div>
+        <div class="skill-chip orange"><span class="skill-dot orange"></span><span class="skill-icon">✨</span>Gemini API</div>
+        <div class="skill-chip orange"><span class="skill-dot orange"></span><span class="skill-icon">🧠</span>OpenAI / ChatGPT <span class="skills-learning-badge">Learning</span></div>
+        <div class="skill-chip orange"><span class="skill-dot orange"></span><span class="skill-icon">🤍</span>Claude AI <span class="skills-learning-badge">Learning</span></div>
+        <div class="skill-chip orange"><span class="skill-dot orange"></span><span class="skill-icon">⚡</span>Groq <span class="skills-learning-badge">Learning</span></div>
+        <div class="skill-chip orange"><span class="skill-dot orange"></span><span class="skill-icon">💬</span>Prompt Engineering</div>
+        <div class="skill-chip orange"><span class="skill-dot orange"></span><span class="skill-icon">🔧</span>AI Workflow Design</div>
+      </div>
+    </div>
+
+    <!-- Google Workspace -->
+    <div class="reveal">
+      <div class="skills-category-label cyan">📊 Google Workspace</div>
+      <div class="skills-grid">
+        <div class="skill-chip cyan"><span class="skill-dot cyan"></span><span class="skill-icon">📊</span>Google Sheets</div>
+        <div class="skill-chip cyan"><span class="skill-dot cyan"></span><span class="skill-icon">📋</span>Google Forms</div>
+        <div class="skill-chip cyan"><span class="skill-dot cyan"></span><span class="skill-icon">✉️</span>Gmail Automation</div>
+        <div class="skill-chip cyan"><span class="skill-dot cyan"></span><span class="skill-icon">⚙️</span>Google Apps Script</div>
+        <div class="skill-chip cyan"><span class="skill-dot cyan"></span><span class="skill-icon">📱</span>Telegram Bot API</div>
+      </div>
+    </div>
+
+    <!-- CRM & Productivity Platforms -->
+    <div class="reveal">
+      <div class="skills-category-label orange">🏢 CRM & Productivity Platforms</div>
+      <div class="skills-grid">
+        <div class="skill-chip orange"><span class="skill-dot orange"></span><span class="skill-icon">🧡</span>HubSpot CRM <span class="skills-learning-badge">Learning</span></div>
+        <div class="skill-chip orange"><span class="skill-dot orange"></span><span class="skill-icon">📝</span>Notion <span class="skills-learning-badge">Learning</span></div>
+        <div class="skill-chip orange"><span class="skill-dot orange"></span><span class="skill-icon">🌐</span>WordPress <span class="skills-learning-badge">Learning</span></div>
+        <div class="skill-chip orange"><span class="skill-dot orange"></span><span class="skill-icon">✅</span>ClickUp</div>
+      </div>
+    </div>
+
+    <!-- Microsoft Tools -->
+    <div class="reveal">
+      <div class="skills-category-label purple">🪟 Microsoft Tools</div>
+      <div class="skills-grid">
+        <div class="skill-chip purple"><span class="skill-dot purple"></span><span class="skill-icon">📘</span>MS Excel <span class="skills-learning-badge">Learning</span></div>
+        <div class="skill-chip purple"><span class="skill-dot purple"></span><span class="skill-icon">💬</span>MS Teams <span class="skills-learning-badge">Learning</span></div>
+        <div class="skill-chip purple"><span class="skill-dot purple"></span><span class="skill-icon">⚡</span>Power Automate <span class="skills-learning-badge">Learning</span></div>
+        <div class="skill-chip purple"><span class="skill-dot purple"></span><span class="skill-icon">📄</span>MS Office 365 <span class="skills-learning-badge">Learning</span></div>
+      </div>
+    </div>
+
+    <!-- Developer / Technical -->
+    <div class="reveal">
+      <div class="skills-category-label purple">💻 Developer & Technical</div>
+      <div class="skills-grid">
+        <div class="skill-chip purple"><span class="skill-dot purple"></span><span class="skill-icon">🟨</span>JavaScript</div>
+        <div class="skill-chip purple"><span class="skill-dot purple"></span><span class="skill-icon">🐍</span>Python (Basic)</div>
+        <div class="skill-chip purple"><span class="skill-dot purple"></span><span class="skill-icon">☕</span>Java Logic</div>
+        <div class="skill-chip purple"><span class="skill-dot purple"></span><span class="skill-icon">🧪</span>Postman</div>
+        <div class="skill-chip purple"><span class="skill-dot purple"></span><span class="skill-icon">🐙</span>GitHub</div>
+      </div>
+    </div>
+
   </div>
 </section>
 
+<!-- ============ PROJECTS ============ -->
 <section id="projects">
   <div class="section-label">Portfolio</div>
   <div class="section-title reveal">Systems I've Built</div>
+  <div style="font-size:14px;color:var(--text-muted);font-family:'JetBrains Mono',monospace;margin-bottom:8px;margin-top:-16px;">Click any card to see the full breakdown + demo video</div>
 
   <div class="projects-grid">
 
     <div class="project-card reveal" onclick="openModal('modal1')">
-      <div class="project-image">
-        <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=600&q=80" alt="Lead Qualifier">
-      </div>
+      <div class="project-card-stripe s1"></div>
       <div class="project-card-top">
         <div class="project-number">01 — Lead Qualifier</div>
+        <span class="project-emoji">🎯</span>
         <div class="project-title">AI-Powered Lead Qualification System</div>
         <p class="project-desc">End-to-end lead scoring pipeline. Form submission triggers AI analysis, scores lead 1–10, routes to hot/warm/cold path with automated email and Telegram alerts.</p>
         <div class="project-arrow">↗</div>
@@ -1450,56 +695,92 @@ footer {
       <div class="project-card-bottom">
         <span class="project-tag">Make.com</span>
         <span class="project-tag">OpenRouter AI</span>
+        <span class="project-tag">Webhook</span>
+        <span class="project-tag">Google Sheets</span>
         <span class="project-tag orange">AI Scoring</span>
       </div>
     </div>
 
     <div class="project-card reveal" onclick="openModal('modal2')">
-      <div class="project-image">
-        <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=600&q=80" alt="Business Monitor">
-      </div>
+      <div class="project-card-stripe s2"></div>
       <div class="project-card-top">
         <div class="project-number">02 — Business Monitor</div>
+        <span class="project-emoji">📡</span>
         <div class="project-title">Daily Business Health Monitor</div>
         <p class="project-desc">Scheduled morning automation that pulls live data from three external APIs — website uptime, subscriber count, and forex rates — into one clean Telegram summary.</p>
         <div class="project-arrow">↗</div>
       </div>
       <div class="project-card-bottom">
         <span class="project-tag">Multi-API</span>
+        <span class="project-tag">Data Store</span>
         <span class="project-tag">Scheduler</span>
         <span class="project-tag orange">Persistent State</span>
       </div>
     </div>
 
     <div class="project-card reveal" onclick="openModal('modal3')">
-      <div class="project-image">
-        <img src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=600&q=80" alt="Follow-up Tracker">
-      </div>
+      <div class="project-card-stripe s3"></div>
       <div class="project-card-top">
         <div class="project-number">03 — Follow-up Tracker</div>
+        <span class="project-emoji">🔔</span>
         <div class="project-title">Automated Follow-up Reminder Bot</div>
         <p class="project-desc">Reads a Google Sheet contact list, filters only "Waiting" leads not followed up in 3+ days, aggregates them into a single daily Telegram message.</p>
         <div class="project-arrow">↗</div>
       </div>
       <div class="project-card-bottom">
         <span class="project-tag">Google Sheets</span>
+        <span class="project-tag">Text Aggregator</span>
         <span class="project-tag">Filter Logic</span>
         <span class="project-tag orange">Telegram</span>
+      </div>
+    </div>
+
+    <div class="project-card reveal" onclick="openModal('modal4')">
+      <div class="project-card-stripe s4"></div>
+      <div class="project-card-top">
+        <div class="project-number">04 — Weather Logger</div>
+        <span class="project-emoji">🌤️</span>
+        <div class="project-title">Live Weather Data Pipeline</div>
+        <p class="project-desc">HTTP module calls OpenWeather API with proper query-param authentication, parses JSON, conditionally alerts if temperature exceeds threshold, logs all data with timestamps.</p>
+        <div class="project-arrow">↗</div>
+      </div>
+      <div class="project-card-bottom">
+        <span class="project-tag">OpenWeather API</span>
+        <span class="project-tag">HTTP Auth</span>
+        <span class="project-tag">Conditional Logic</span>
+        <span class="project-tag orange">Error Handler</span>
+      </div>
+    </div>
+
+    <div class="project-card reveal" onclick="openModal('modal5')">
+      <div class="project-card-stripe s5"></div>
+      <div class="project-card-top">
+        <div class="project-number">05 — Form Integration</div>
+        <span class="project-emoji">🔌</span>
+        <div class="project-title">Google Forms → Webhook Bridge</div>
+        <p class="project-desc">Custom Google Apps Script that fires a Make.com webhook on every form submission — enabling real-time, event-driven automation from standard Google Forms at zero cost.</p>
+        <div class="project-arrow">↗</div>
+      </div>
+      <div class="project-card-bottom">
+        <span class="project-tag">Apps Script</span>
+        <span class="project-tag">Google Forms</span>
+        <span class="project-tag">Webhook Bridge</span>
+        <span class="project-tag orange">JavaScript</span>
       </div>
     </div>
 
   </div>
 </section>
 
+<!-- ============ DEMO ============ -->
 <section id="demo">
   <div class="section-label">Live Demo</div>
   <div class="section-title reveal">See It Working</div>
-
   <div class="video-container-wrap reveal">
     <p class="video-section-desc">
-      Watch the AI Lead Qualifier in action — a form submission triggers the full pipeline in real time: webhook fires, AI scores the lead, Google Sheets updates, and Telegram receives an instant alert.
+      Watch the AI Lead Qualifier in action — a form submission triggers the full pipeline in real time: webhook fires, AI scores the lead, Google Sheets updates, and Telegram receives an instant alert. No manual steps. No editing. Just the system doing its job.
     </p>
-    <div class="video-embed-box" id="videoBox">
+    <div class="video-embed-box">
       <iframe
         src="https://www.youtube.com/embed/HDaa374IMJ8?rel=0&modestbranding=1"
         title="Lead Qualifier Demo"
@@ -1510,10 +791,10 @@ footer {
   </div>
 </section>
 
+<!-- ============ PROCESS ============ -->
 <section id="process">
   <div class="section-label">How I Work</div>
   <div class="section-title reveal">From Brief to Deployed</div>
-
   <div class="process-steps reveal">
     <div class="process-step">
       <div class="process-step-num">01</div>
@@ -1535,19 +816,58 @@ footer {
       <h4>Break It</h4>
       <p>Deliberately send wrong data, break the API key, test every error path. If the error handler works, it's done.</p>
     </div>
+    <div class="process-step">
+      <div class="process-step-num">05</div>
+      <h4>Document</h4>
+      <p>Write a plain-English SOP so your team can understand and maintain the system without me.</p>
+    </div>
+    <div class="process-step">
+      <div class="process-step-num">06</div>
+      <h4>Deliver</h4>
+      <p>Hand over working credentials, documentation, and a walkthrough video. You own it completely.</p>
+    </div>
   </div>
 </section>
 
+<!-- ============ SOCIAL BUTTONS ============ -->
+<div class="social-buttons-section">
+  <div class="section-label" style="margin-bottom:8px">Find Me Online</div>
+  <div class="social-buttons-inner">
+    <div class="social-buttons-label">Connect & Follow</div>
+    <div class="social-btns-row">
+      <a href="https://web.facebook.com/jerielle2" target="_blank" class="social-btn fb">
+        <span class="social-btn-icon">📘</span>
+        <span class="social-btn-text">Facebook — Jerielle Tadena</span>
+        <span class="social-btn-arrow">↗</span>
+      </a>
+      <a href="mailto:tadenajerielle@gmail.com" class="social-btn gmail">
+        <span class="social-btn-icon">✉️</span>
+        <span class="social-btn-text">Gmail — tadenajerielle@gmail.com</span>
+        <span class="social-btn-arrow">↗</span>
+      </a>
+      <a href="https://www.onlinejobs.ph/jobseekers/info/2685788" target="_blank" class="social-btn ojph">
+        <span class="social-btn-icon">💼</span>
+        <span class="social-btn-text">OnlineJobs.ph — Hire Me Here</span>
+        <span class="social-btn-arrow">↗</span>
+      </a>
+      <a href="https://github.com/jerielletadena" target="_blank" class="social-btn github">
+        <span class="social-btn-icon">⌨️</span>
+        <span class="social-btn-text">GitHub — jerielletadena</span>
+        <span class="social-btn-arrow">↗</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- ============ CONTACT ============ -->
 <section id="contact">
   <div class="section-label">Let's Work Together</div>
-
   <div class="contact-grid">
     <div class="contact-info reveal">
       <h3>Ready to automate<br>your <span>manual work?</span></h3>
       <p>
-        I'm available for part-time remote work and open to trial projects. If you have a repetitive process that takes hours every week — I can probably automate it.
+        I'm available for part-time remote work and open to trial projects. If you have a repetitive process that takes hours every week — I can probably automate it. Message me below and I'll reply within 24 hours.
       </p>
-
       <div class="contact-links">
         <a href="https://www.onlinejobs.ph/jobseekers/info/2685788" target="_blank" class="contact-link">
           <div class="contact-link-icon">💼</div>
@@ -1564,155 +884,465 @@ footer {
           </div>
         </a>
         <a href="https://web.facebook.com/jerielle2" target="_blank" class="contact-link">
-          <div class="contact-link-icon">👥</div>
+          <div class="contact-link-icon">📘</div>
           <div>
-            <div class="contact-link-label">Connect</div>
-            <div class="contact-link-value">Facebook Profile</div>
+            <div class="contact-link-label">Facebook</div>
+            <div class="contact-link-value">facebook.com/jerielle2</div>
+          </div>
+        </a>
+        <a href="https://github.com/jerielletadena" target="_blank" class="contact-link">
+          <div class="contact-link-icon">⌨️</div>
+          <div>
+            <div class="contact-link-label">GitHub</div>
+            <div class="contact-link-value">github.com/jerielletadena</div>
           </div>
         </a>
       </div>
     </div>
 
-    <form action="https://formsubmit.co/tadenajerielle@gmail.com" method="POST" class="contact-form reveal">
-      <input type="hidden" name="_subject" value="New Portfolio Inquiry!">
-      <input type="hidden" name="_captcha" value="false">
-      
-      <div class="form-group">
-        <label class="form-label">Your Name</label>
-        <input type="text" name="name" class="form-input" placeholder="John Smith" required>
+    <div class="contact-form reveal">
+      <!--
+      ====================================================
+      CONTACT FORM — HOW TO MAKE IT FULLY FUNCTIONAL:
+      ====================================================
+      Option A (Recommended — EmailJS, Free):
+        1. Go to https://emailjs.com → Create free account
+        2. Email Services → Add Service → Gmail → connect tadenajerielle@gmail.com
+        3. Email Templates → Create Template with these variables:
+           Subject: Portfolio Inquiry from {{from_name}}
+           Body:    Name: {{from_name}}
+                    Email: {{reply_to}}
+                    Budget: {{budget}}
+                    Message: {{message}}
+        4. Account → API Keys → copy Public Key
+        5. Replace the 3 values in EMAILJS_CONFIG below in the <script> section.
+
+      Option B (Always works — no setup):
+        The form already falls back to mailto: if EmailJS isn't configured.
+      ====================================================
+      -->
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Your Name</label>
+          <input type="text" id="contactName" class="form-input" placeholder="John Smith">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" id="contactEmail" class="form-input" placeholder="john@company.com">
+        </div>
       </div>
       <div class="form-group">
-        <label class="form-label">Email Address</label>
-        <input type="email" name="email" class="form-input" placeholder="john@company.com" required>
+        <label class="form-label">Budget / Rate Expected</label>
+        <input type="text" id="contactBudget" class="form-input" placeholder="e.g. $5–10/hr or fixed project">
       </div>
       <div class="form-group">
         <label class="form-label">What do you need automated?</label>
-        <textarea name="message" class="form-textarea" placeholder="Describe your manual process and I'll tell you if I can automate it..." required></textarea>
+        <textarea id="contactMessage" class="form-textarea" placeholder="Describe your manual process and I'll tell you if I can automate it..."></textarea>
       </div>
-      <button type="submit" class="form-submit">Send Message →</button>
-    </form>
+      <button class="form-submit" id="formSubmitBtn" onclick="handleFormSubmit()">Send Message →</button>
+      <div class="form-status" id="formStatus"></div>
+    </div>
   </div>
 </section>
 
+<!-- ============ FOOTER ============ -->
 <footer>
   <div class="footer-left">© 2026 Jerielle Tadena — Automation Architect</div>
+  <div class="footer-socials">
+    <a href="https://web.facebook.com/jerielle2" target="_blank" class="footer-social" title="Facebook">📘</a>
+    <a href="mailto:tadenajerielle@gmail.com" class="footer-social" title="Gmail">✉️</a>
+    <a href="https://www.onlinejobs.ph/jobseekers/info/2685788" target="_blank" class="footer-social" title="OnlineJobs.ph">💼</a>
+    <a href="https://github.com/jerielletadena" target="_blank" class="footer-social" title="GitHub">⌨️</a>
+  </div>
   <div class="footer-right">Built with precision. Deployed with purpose.</div>
 </footer>
 
-<div class="modal-overlay" id="modal1" onclick="closeModalOnOverlay(event, 'modal1')">
+<!-- ============================================================
+     PROJECT MODALS
+     To add a video to any project:
+     1. Upload your demo video to YouTube (Unlisted is fine)
+     2. Copy the video ID from the URL (the part after ?v=)
+     3. Find PORTFOLIO_VIDEOS in the <script> section below
+     4. Paste the ID for the matching project key
+     E.g.: modal2: 'dQw4w9WgXcQ'
+============================================================ -->
+
+<!-- Modal 1: Lead Qualifier -->
+<div class="modal-overlay" id="modal1" onclick="closeModalOnOverlay(event,'modal1')">
   <div class="modal">
     <div class="modal-header">
       <div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);letter-spacing:0.1em;margin-bottom:8px;">01 — Lead Qualifier</div>
-        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:22px;letter-spacing:-0.5px;">AI-Powered Lead Qualification System</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:.1em;margin-bottom:8px;">🎯 01 — Lead Qualifier</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:21px;letter-spacing:-0.5px;">AI-Powered Lead Qualification System</div>
       </div>
       <button class="modal-close" onclick="closeModal('modal1')">×</button>
     </div>
     <div class="modal-body">
-      
-      <div class="modal-section">
-        <div class="modal-section-label">Project Walkthrough</div>
-        <div class="video-embed-box">
-          <iframe src="https://www.youtube.com/embed/HDaa374IMJ8?rel=0&modestbranding=1" allowfullscreen></iframe>
+      <!-- Video Section -->
+      <div class="modal-video-section">
+        <div class="modal-video-label">Demo Video</div>
+        <div class="modal-video-box" id="video-modal1">
+          <iframe src="https://www.youtube.com/embed/HDaa374IMJ8?rel=0&modestbranding=1" title="Lead Qualifier Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
         </div>
       </div>
-
       <div class="modal-section">
         <div class="modal-section-label">Problem Solved</div>
         <p>Business owners manually sorting through form submissions, guessing which leads are worth following up on. Hours wasted. Hot leads going cold.</p>
       </div>
+      <div class="modal-section">
+        <div class="modal-section-label">Automation Flow</div>
+        <div class="flow-steps">
+          <div class="flow-step"><div class="flow-step-num">01</div><div class="flow-step-text"><strong>Google Form</strong> receives lead submission with name, business type, need, budget, and email</div></div>
+          <div class="flow-step"><div class="flow-step-num">02</div><div class="flow-step-text"><strong>Apps Script webhook bridge</strong> fires instantly and sends data to Make.com</div></div>
+          <div class="flow-step"><div class="flow-step-num">03</div><div class="flow-step-text"><strong>Google Sheets</strong> logs the raw lead data immediately as the first action</div></div>
+          <div class="flow-step"><div class="flow-step-num">04</div><div class="flow-step-text"><strong>OpenRouter AI (LLM)</strong> scores the lead 1–10 and returns JSON with score, tier, reason, and suggested action</div></div>
+          <div class="flow-step"><div class="flow-step-num">05</div><div class="flow-step-text"><strong>JSON Parser</strong> extracts score and tier as individual mappable fields</div></div>
+          <div class="flow-step"><div class="flow-step-num">06</div><div class="flow-step-text"><strong>Google Sheets updated</strong> with AI score and tier in the same row</div></div>
+          <div class="flow-step"><div class="flow-step-num">07</div><div class="flow-step-text"><strong>Router (3 paths)</strong> — Hot (≥7): Gmail alert + Telegram. Warm (4–6): auto-reply email to lead. Cold (≤3): sheet only.</div></div>
+          <div class="flow-step"><div class="flow-step-num">08</div><div class="flow-step-text"><strong>Error handler</strong> on HTTP module sends Gmail alert with error details if AI call fails</div></div>
+        </div>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-label">Tools Used</div>
+        <div class="modal-tags">
+          <span class="project-tag">Make.com</span><span class="project-tag">Google Forms</span><span class="project-tag">Apps Script</span><span class="project-tag">Webhook</span><span class="project-tag">Google Sheets</span><span class="project-tag">OpenRouter AI</span><span class="project-tag">JSON Parser</span><span class="project-tag">Gmail</span><span class="project-tag">Telegram Bot</span><span class="project-tag orange">Error Handling</span>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
-<div class="modal-overlay" id="modal2" onclick="closeModalOnOverlay(event, 'modal2')">
+<!-- Modal 2: Business Monitor -->
+<div class="modal-overlay" id="modal2" onclick="closeModalOnOverlay(event,'modal2')">
   <div class="modal">
     <div class="modal-header">
       <div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);letter-spacing:0.1em;margin-bottom:8px;">02 — Business Monitor</div>
-        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:22px;letter-spacing:-0.5px;">Daily Business Health Monitor</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:.1em;margin-bottom:8px;">📡 02 — Business Monitor</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:21px;letter-spacing:-0.5px;">Daily Business Health Monitor</div>
       </div>
       <button class="modal-close" onclick="closeModal('modal2')">×</button>
     </div>
     <div class="modal-body">
-      
-      <div class="modal-section">
-        <div class="modal-section-label">Project Walkthrough</div>
-        <div class="video-embed-box">
-          <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID_HERE?rel=0&modestbranding=1" allowfullscreen></iframe>
+      <div class="modal-video-section">
+        <div class="modal-video-label">Demo Video</div>
+        <div class="modal-video-box" id="video-modal2">
+          <div class="modal-video-placeholder">
+            <div class="play-ring">▶</div>
+            <p>Demo video coming soon</p>
+            <span class="modal-video-tip">// Add YouTube ID to PORTFOLIO_VIDEOS.modal2 in source</span>
+          </div>
         </div>
       </div>
-
       <div class="modal-section">
         <div class="modal-section-label">Problem Solved</div>
         <p>Business owner spending 20 minutes every morning checking three different tabs — website status, subscriber count, and exchange rates. Fully automated into one clean morning Telegram message.</p>
       </div>
+      <div class="modal-section">
+        <div class="modal-section-label">Automation Flow</div>
+        <div class="flow-steps">
+          <div class="flow-step"><div class="flow-step-num">01</div><div class="flow-step-text"><strong>Schedule trigger</strong> fires every morning at 8AM Manila time (UTC+8 handled correctly)</div></div>
+          <div class="flow-step"><div class="flow-step-num">02</div><div class="flow-step-text"><strong>Google Sheets</strong> reads subscriber row count for "yesterday" metric</div></div>
+          <div class="flow-step"><div class="flow-step-num">03</div><div class="flow-step-text"><strong>HTTP: Uptime API</strong> checks if the business website is online or offline</div></div>
+          <div class="flow-step"><div class="flow-step-num">04</div><div class="flow-step-text"><strong>HTTP: Exchange Rate API</strong> fetches live USD → PHP rate (zero-signup free API)</div></div>
+          <div class="flow-step"><div class="flow-step-num">05</div><div class="flow-step-text"><strong>Data Store</strong> retrieves yesterday's exchange rate for comparison</div></div>
+          <div class="flow-step"><div class="flow-step-num">06</div><div class="flow-step-text"><strong>If/Else branch</strong> — formats an urgent alert if website is DOWN, normal summary if ONLINE</div></div>
+          <div class="flow-step"><div class="flow-step-num">07</div><div class="flow-step-text"><strong>Telegram</strong> delivers the formatted morning report with emojis and rate change indicator</div></div>
+          <div class="flow-step"><div class="flow-step-num">08</div><div class="flow-step-text"><strong>Data Store updated</strong> with today's rate for tomorrow's comparison</div></div>
+        </div>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-label">Tools Used</div>
+        <div class="modal-tags">
+          <span class="project-tag">Make.com</span><span class="project-tag">Scheduler</span><span class="project-tag">Google Sheets</span><span class="project-tag">HTTP APIs (×3)</span><span class="project-tag">Data Store</span><span class="project-tag">If/Else Logic</span><span class="project-tag orange">Telegram Bot</span>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
-<div class="modal-overlay" id="modal3" onclick="closeModalOnOverlay(event, 'modal3')">
+<!-- Modal 3: Follow-up Tracker -->
+<div class="modal-overlay" id="modal3" onclick="closeModalOnOverlay(event,'modal3')">
   <div class="modal">
     <div class="modal-header">
       <div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);letter-spacing:0.1em;margin-bottom:8px;">03 — Follow-up Tracker</div>
-        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:22px;letter-spacing:-0.5px;">Automated Follow-up Reminder Bot</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:.1em;margin-bottom:8px;">🔔 03 — Follow-up Tracker</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:21px;letter-spacing:-0.5px;">Automated Follow-up Reminder Bot</div>
       </div>
       <button class="modal-close" onclick="closeModal('modal3')">×</button>
     </div>
     <div class="modal-body">
-
-      <div class="modal-section">
-        <div class="modal-section-label">Project Walkthrough</div>
-        <div class="video-embed-box">
-          <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID_HERE?rel=0&modestbranding=1" allowfullscreen></iframe>
+      <div class="modal-video-section">
+        <div class="modal-video-label">Demo Video</div>
+        <div class="modal-video-box" id="video-modal3">
+          <div class="modal-video-placeholder">
+            <div class="play-ring">▶</div>
+            <p>Demo video coming soon</p>
+            <span class="modal-video-tip">// Add YouTube ID to PORTFOLIO_VIDEOS.modal3 in source</span>
+          </div>
         </div>
       </div>
-
       <div class="modal-section">
         <div class="modal-section-label">Problem Solved</div>
         <p>Sales teams forgetting to follow up with warm leads. Contacts fall through the cracks. Revenue lost to simple forgetfulness.</p>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-label">Automation Flow</div>
+        <div class="flow-steps">
+          <div class="flow-step"><div class="flow-step-num">01</div><div class="flow-step-text"><strong>Google Sheets Search Rows</strong> filters only contacts with Status = "Waiting"</div></div>
+          <div class="flow-step"><div class="flow-step-num">02</div><div class="flow-step-text"><strong>Text Aggregator</strong> combines all waiting contacts into a single formatted message block</div></div>
+          <div class="flow-step"><div class="flow-step-num">03</div><div class="flow-step-text"><strong>Telegram Bot</strong> delivers the daily follow-up list in one clean message</div></div>
+        </div>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-label">Key Architecture Decision</div>
+        <p>Used a Filter instead of a Router — because only one conditional output path existed. Cleaner, fewer modules, same result. Architecture over convention.</p>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-label">Tools Used</div>
+        <div class="modal-tags">
+          <span class="project-tag">Make.com</span><span class="project-tag">Google Sheets</span><span class="project-tag">Text Aggregator</span><span class="project-tag">Filter Logic</span><span class="project-tag orange">Telegram Bot API</span>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
+<!-- Modal 4: Weather Logger -->
+<div class="modal-overlay" id="modal4" onclick="closeModalOnOverlay(event,'modal4')">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:.1em;margin-bottom:8px;">🌤️ 04 — Weather Logger</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:21px;letter-spacing:-0.5px;">Live Weather Data Pipeline</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('modal4')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-video-section">
+        <div class="modal-video-label">Demo Video</div>
+        <div class="modal-video-box" id="video-modal4">
+          <div class="modal-video-placeholder">
+            <div class="play-ring">▶</div>
+            <p>Demo video coming soon</p>
+            <span class="modal-video-tip">// Add YouTube ID to PORTFOLIO_VIDEOS.modal4 in source</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-label">What This Demonstrates</div>
+        <p>Core API authentication skills — including diagnosing and fixing a 401 Unauthorized error by correctly identifying that OpenWeather requires an API key as a query parameter (appid), not in headers.</p>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-label">Automation Flow</div>
+        <div class="flow-steps">
+          <div class="flow-step"><div class="flow-step-num">01</div><div class="flow-step-text"><strong>HTTP GET</strong> to OpenWeather API with appid as query parameter authentication</div></div>
+          <div class="flow-step"><div class="flow-step-num">02</div><div class="flow-step-text"><strong>JSON response parsed</strong> — coord, weather description, country, city, temperature extracted</div></div>
+          <div class="flow-step"><div class="flow-step-num">03</div><div class="flow-step-text"><strong>Temperature converted</strong> from Kelvin to Celsius using round((temp - 273.15); 1)</div></div>
+          <div class="flow-step"><div class="flow-step-num">04</div><div class="flow-step-text"><strong>Filter</strong> checks if temperature exceeds 30°C threshold</div></div>
+          <div class="flow-step"><div class="flow-step-num">05</div><div class="flow-step-text"><strong>Google Sheets</strong> logs all data with live timestamp on every run</div></div>
+          <div class="flow-step"><div class="flow-step-num">06</div><div class="flow-step-text"><strong>Gmail alert</strong> fires only when temperature threshold exceeded</div></div>
+          <div class="flow-step"><div class="flow-step-num">07</div><div class="flow-step-text"><strong>Error handler</strong> catches API failures and sends Gmail notification with error code</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal 5: Form Bridge -->
+<div class="modal-overlay" id="modal5" onclick="closeModalOnOverlay(event,'modal5')">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:.1em;margin-bottom:8px;">🔌 05 — Form Integration</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:21px;letter-spacing:-0.5px;">Google Forms → Webhook Bridge</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('modal5')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-video-section">
+        <div class="modal-video-label">Demo Video</div>
+        <div class="modal-video-box" id="video-modal5">
+          <div class="modal-video-placeholder">
+            <div class="play-ring">▶</div>
+            <p>Demo video coming soon</p>
+            <span class="modal-video-tip">// Add YouTube ID to PORTFOLIO_VIDEOS.modal5 in source</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-label">The Technical Problem</div>
+        <p>Google Forms has no native webhook support. Most solutions require expensive third-party tools. This implementation uses Google Apps Script to bridge the gap at zero cost.</p>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-label">How It Works</div>
+        <div class="flow-steps">
+          <div class="flow-step"><div class="flow-step-num">01</div><div class="flow-step-text"><strong>Apps Script trigger</strong> attached to the form's onFormSubmit event</div></div>
+          <div class="flow-step"><div class="flow-step-num">02</div><div class="flow-step-text"><strong>Response data extracted</strong> by index position from the form response object</div></div>
+          <div class="flow-step"><div class="flow-step-num">03</div><div class="flow-step-text"><strong>JSON.stringify(data)</strong> automatically sanitizes all special characters before transmission</div></div>
+          <div class="flow-step"><div class="flow-step-num">04</div><div class="flow-step-text"><strong>UrlFetchApp.fetch()</strong> fires a POST request to the Make.com webhook URL instantly</div></div>
+          <div class="flow-step"><div class="flow-step-num">05</div><div class="flow-step-text"><strong>Make.com receives</strong> clean JSON with all form fields as mappable variables</div></div>
+        </div>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-label">Why This Matters</div>
+        <p>Replaces the need for paid form tools like Typeform or Tally. Any client already using Google Forms can connect to any Make.com automation instantly — no new subscriptions required.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ JAVASCRIPT ============ -->
 <script>
+// ============================================================
+//  PROJECT VIDEO CONFIGURATION
+//  To add a demo video to any project:
+//  1. Upload to YouTube (set as Unlisted)
+//  2. Copy the video ID from the URL (?v=XXXXXX)
+//  3. Paste it in the matching key below
+// ============================================================
+const PORTFOLIO_VIDEOS = {
+  modal1: 'HDaa374IMJ8',  // ✅ Lead Qualifier — already set
+  modal2: '',             // 📡 Business Monitor — paste ID here
+  modal3: '',             // 🔔 Follow-up Tracker — paste ID here
+  modal4: '',             // 🌤️ Weather Logger — paste ID here
+  modal5: '',             // 🔌 Form Bridge — paste ID here
+};
+
+// Inject iframes for any configured video IDs (except modal1 which is hardcoded above)
+Object.entries(PORTFOLIO_VIDEOS).forEach(([modalId, videoId]) => {
+  if (!videoId || modalId === 'modal1') return;
+  const box = document.getElementById('video-' + modalId);
+  if (!box) return;
+  box.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1" title="Project Demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+});
+
+// ============================================================
+//  EMAILJS CONFIGURATION
+//  To activate functional email delivery:
+//  1. Go to https://emailjs.com → create free account
+//  2. Add Gmail service → connect tadenajerielle@gmail.com
+//  3. Create email template with variables:
+//       {{from_name}}, {{reply_to}}, {{budget}}, {{message}}
+//  4. Get your Public Key from Account → API Keys
+//  5. Fill in the three values below
+// ============================================================
+const EMAILJS_CONFIG = {
+  publicKey:  'YOUR_PUBLIC_KEY',   // e.g. 'abc123XYZ'
+  serviceId:  'YOUR_SERVICE_ID',   // e.g. 'service_abc123'
+  templateId: 'YOUR_TEMPLATE_ID',  // e.g. 'template_abc123'
+};
+
+const EMAILJS_CONFIGURED = !Object.values(EMAILJS_CONFIG).some(v => v.startsWith('YOUR_'));
+if (EMAILJS_CONFIGURED) {
+  emailjs.init(EMAILJS_CONFIG.publicKey);
+}
+
+// ——— Contact Form Handler ———
+async function handleFormSubmit() {
+  const name    = document.getElementById('contactName').value.trim();
+  const email   = document.getElementById('contactEmail').value.trim();
+  const budget  = document.getElementById('contactBudget').value.trim();
+  const message = document.getElementById('contactMessage').value.trim();
+  const btn     = document.getElementById('formSubmitBtn');
+  const status  = document.getElementById('formStatus');
+
+  if (!name || !email || !message) {
+    showFormStatus('Please fill in Name, Email, and Message.', 'error');
+    return;
+  }
+
+  btn.textContent = 'Sending…';
+  btn.classList.add('sending');
+
+  if (EMAILJS_CONFIGURED) {
+    // Primary: EmailJS
+    try {
+      await emailjs.send(EMAILJS_CONFIG.serviceId, EMAILJS_CONFIG.templateId, {
+        from_name: name,
+        reply_to:  email,
+        budget:    budget || 'Not specified',
+        message:   message,
+        to_email:  'tadenajerielle@gmail.com',
+      });
+      btn.textContent = 'Message Sent ✓';
+      btn.classList.remove('sending');
+      btn.classList.add('success');
+      showFormStatus('✓ Message sent! I\'ll reply within 24 hours.', 'success');
+      document.getElementById('contactName').value = '';
+      document.getElementById('contactEmail').value = '';
+      document.getElementById('contactBudget').value = '';
+      document.getElementById('contactMessage').value = '';
+      setTimeout(() => {
+        btn.textContent = 'Send Message →';
+        btn.classList.remove('success');
+      }, 4000);
+    } catch (err) {
+      btn.textContent = 'Send Message →';
+      btn.classList.remove('sending');
+      btn.classList.add('error-state');
+      showFormStatus('EmailJS failed. Opening your email client as fallback…', 'error');
+      setTimeout(() => btn.classList.remove('error-state'), 3000);
+      openMailtoFallback(name, email, budget, message);
+    }
+  } else {
+    // Fallback: mailto (always works, no setup)
+    btn.textContent = 'Opening Email…';
+    setTimeout(() => {
+      btn.textContent = 'Send Message →';
+      btn.classList.remove('sending');
+    }, 2000);
+    openMailtoFallback(name, email, budget, message);
+    showFormStatus('📧 Your email client will open with the message pre-filled. Hit send!', 'success');
+  }
+}
+
+function openMailtoFallback(name, email, budget, message) {
+  const subject = encodeURIComponent(`Portfolio Inquiry from ${name}`);
+  const body = encodeURIComponent(
+    `Name: ${name}\nEmail: ${email}\nBudget: ${budget || 'Not specified'}\n\nMessage:\n${message}`
+  );
+  window.location.href = `mailto:tadenajerielle@gmail.com?subject=${subject}&body=${body}`;
+}
+
+function showFormStatus(msg, type) {
+  const el = document.getElementById('formStatus');
+  el.textContent = msg;
+  el.className = `form-status show ${type}`;
+  setTimeout(() => el.classList.remove('show'), 6000);
+}
+
 // ——— Custom Cursor ———
-const dot = document.getElementById('cursorDot');
+const dot  = document.getElementById('cursorDot');
 const ring = document.getElementById('cursorRing');
-let ringX = 0, ringY = 0;
-let dotX = 0, dotY = 0;
+let ringX = 0, ringY = 0, dotX = 0, dotY = 0;
 
 document.addEventListener('mousemove', e => {
   dotX = e.clientX; dotY = e.clientY;
   dot.style.left = dotX + 'px';
-  dot.style.top = dotY + 'px';
+  dot.style.top  = dotY + 'px';
 });
 
 function animateRing() {
   ringX += (dotX - ringX) * 0.12;
   ringY += (dotY - ringY) * 0.12;
   ring.style.left = ringX + 'px';
-  ring.style.top = ringY + 'px';
+  ring.style.top  = ringY + 'px';
   requestAnimationFrame(animateRing);
 }
 animateRing();
 
-document.querySelectorAll('a, button, .project-card, .skill-chip, .highlight-item').forEach(el => {
+document.querySelectorAll('a, button, .project-card, .skill-chip, .highlight-item, .social-btn, .contact-link').forEach(el => {
   el.addEventListener('mouseenter', () => ring.classList.add('hovered'));
   el.addEventListener('mouseleave', () => ring.classList.remove('hovered'));
 });
 
 // ——— Theme Toggle ———
 const toggle = document.getElementById('themeToggle');
-const html = document.documentElement;
-
+const html   = document.documentElement;
 toggle.addEventListener('click', () => {
   html.dataset.theme = html.dataset.theme === 'dark' ? 'light' : 'dark';
   localStorage.setItem('theme', html.dataset.theme);
 });
-
 const saved = localStorage.getItem('theme');
 if (saved) html.dataset.theme = saved;
 
@@ -1723,19 +1353,13 @@ window.addEventListener('scroll', () => {
 });
 
 // ——— Mobile Menu ———
-const hamburger = document.getElementById('hamburger');
+const hamburger  = document.getElementById('hamburger');
 const mobileMenu = document.getElementById('mobileMenu');
-
-hamburger.addEventListener('click', () => {
-  mobileMenu.classList.toggle('open');
-});
-
-function closeMobile() {
-  mobileMenu.classList.remove('open');
-}
+hamburger.addEventListener('click', () => mobileMenu.classList.toggle('open'));
+function closeMobile() { mobileMenu.classList.remove('open'); }
 
 // ——— Scroll Reveal ———
-const reveals = document.querySelectorAll('.reveal');
+const reveals  = document.querySelectorAll('.reveal');
 const observer = new IntersectionObserver(entries => {
   entries.forEach((entry, i) => {
     if (entry.isIntersecting) {
@@ -1743,8 +1367,7 @@ const observer = new IntersectionObserver(entries => {
       observer.unobserve(entry.target);
     }
   });
-}, { threshold: 0.1 });
-
+}, { threshold: 0.08 });
 reveals.forEach(el => observer.observe(el));
 
 // ——— Project Modals ———
@@ -1752,16 +1375,13 @@ function openModal(id) {
   document.getElementById(id).classList.add('active');
   document.body.style.overflow = 'hidden';
 }
-
 function closeModal(id) {
   document.getElementById(id).classList.remove('active');
   document.body.style.overflow = '';
 }
-
 function closeModalOnOverlay(e, id) {
   if (e.target === document.getElementById(id)) closeModal(id);
 }
-
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
     document.querySelectorAll('.modal-overlay.active').forEach(m => {
@@ -1771,19 +1391,14 @@ document.addEventListener('keydown', e => {
   }
 });
 
-// ——— Smooth active nav links ———
+// ——— Active Nav Links ———
 const sections = document.querySelectorAll('section[id]');
 const navLinks = document.querySelectorAll('.nav-links a');
-
 window.addEventListener('scroll', () => {
   let current = '';
-  sections.forEach(s => {
-    if (window.scrollY >= s.offsetTop - 100) current = s.id;
-  });
+  sections.forEach(s => { if (window.scrollY >= s.offsetTop - 100) current = s.id; });
   navLinks.forEach(a => {
-    a.style.color = a.getAttribute('href') === '#' + current
-      ? 'var(--text-primary)'
-      : '';
+    a.style.color = a.getAttribute('href') === '#' + current ? 'var(--text-primary)' : '';
   });
 });
 </script>
