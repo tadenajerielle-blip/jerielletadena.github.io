@@ -549,21 +549,15 @@ footer{padding:32px clamp(24px,5vw,64px);border-top:1px solid var(--border);disp
   <div class="about-grid">
     <!-- Avatar Column -->
     <div class="about-avatar-col reveal">
-      <div class="avatar-wrap">
-        <div class="avatar-ring-outer"></div>
-        <div class="avatar-ring-inner"></div>
-        <!--
-          TO ADD YOUR PHOTO:
-          1. Place your photo file (e.g., profile.jpg) in the same folder as this HTML file
-          2. Change src="profile.jpg" below to your filename
-          3. The fallback "JT" initials will show if the image is missing
-        -->
-        <img src="images/profile.jpg" alt="Jerielle Tadena" class="avatar-img-el"
-             onerror="this.style.display='none';document.getElementById('avatarFallback').style.display='flex'">
-        <div class="avatar-fallback" id="avatarFallback">JT</div>
-      </div>
-      <div class="avatar-badge">Available Now</div>
-    </div>
+  <div class="avatar-wrap">
+    <div class="avatar-ring-outer"></div>
+    <div class="avatar-ring-inner"></div>
+
+    <img src="images/profile.jpg" alt="Jerielle Tadena" class="avatar-img-el">
+  </div>
+
+  <div class="avatar-badge">Available Now</div>
+</div>
     <!-- Bio Column -->
     <div class="about-text reveal">
       <p>
